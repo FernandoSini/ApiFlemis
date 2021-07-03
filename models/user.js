@@ -87,6 +87,7 @@ userSchema.methods = {
         if (!password) return "";
 
         try {
+            //tentando encriptografar
             return crypto.createHmac('sha256', this.salt)
                 .update(password).digest("hex");
 
