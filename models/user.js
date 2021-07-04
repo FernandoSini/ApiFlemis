@@ -98,7 +98,7 @@ userSchema.methods = {
         }
     },
     //pre middleware usado parar remover dados do usuario quando ele for deletado
-    //isso irei adicionar depois
+    //isso irei adicionar depois flemis
 
 }
 module.exports = mongoose.model("User", userSchema);
