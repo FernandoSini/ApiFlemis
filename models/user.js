@@ -5,6 +5,7 @@ const { type } = require("os");
 const { matches } = require("lodash");
 const { ObjectId } = mongoose.Schema;
 // const Post = require('./post')
+//teste pra poder adicionar no git
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -32,7 +33,7 @@ const userSchema = new mongoose.Schema({
         trim: true,
         required: true,
     },
-    salt: String,// permite gerar string randomicamente
+    salt: String,// permite gerar string randomicamentee
     avatar_profile: {
         data: Buffer, // envio das imagens em forma binaria, e será armazenado e convertido no content type
         contentType: String,
