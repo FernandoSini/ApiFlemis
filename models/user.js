@@ -49,6 +49,10 @@ const userSchema = new mongoose.Schema({
         data: String,
         default: ""
     },
+    createdAt:{
+        type:Date,
+        default:Date.now,
+    },
     likesSent: [{ type: ObjectId, ref: "User" }],
     likesReceived: [{ type: ObjectId, ref: "User" }],
     role: {
