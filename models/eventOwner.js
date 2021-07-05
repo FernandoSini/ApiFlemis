@@ -5,24 +5,16 @@ const { type } = require("os");
 const { ObjectId } = mongoose.Schema;
 // const Post = require('./post')
 //teste pra poder adicionar no git
-const userSchema = new mongoose.Schema({
-    name: {
+const eventOwnerSchema = new mongoose.Schema({
+    ownerName: {
         type: String,
         trim: true,
         required: true,
     },
-    lastname: {
-        type: String,
+    documentNumber: {
+        type: int,
         trim: true,
-        required: true,
-    },
-    birthday: {
-        type: String,
-        unique: true,
-    },
-    gender:{
-        type: String,
-        enum: ["MALE", "FEMALE", "NONBINARY"]
+
     },
     email: {
         type: String,
@@ -48,15 +40,15 @@ const userSchema = new mongoose.Schema({
         data: String,
         default: ""
     },
-    createdAt:{
-        type:Date,
-        default:Date.now,
+    createdAt: {
+        type: Date,
+        default: Date.now,
     },
     likesSent: [{ type: ObjectId, ref: "User" }],
     likesReceived: [{ type: ObjectId, ref: "User" }],
     role: {
         type: String,
-        enum:["user", "admin","mod"],
+        enum: ["user", "admin", "mod"],
         default: "user"
     }
 });
@@ -109,4 +101,4 @@ userSchema.methods = {
     //isso irei adicionar depois flemis
 
 }
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model("EventOwner", eventOwnerSchema);
