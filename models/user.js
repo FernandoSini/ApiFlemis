@@ -6,7 +6,6 @@ const { matches } = require("lodash");
 const { ObjectId } = mongoose.Schema;
 // const Post = require('./post')
 //teste pra poder adicionar no git
-
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -21,6 +20,10 @@ const userSchema = new mongoose.Schema({
     birthday: {
         type: String,
         unique: true,
+    },
+    gender:{
+        type: String,
+        enum: ["MALE", "FEMALE", "NONBINARY"]
     },
     email: {
         type: String,
@@ -50,7 +53,8 @@ const userSchema = new mongoose.Schema({
     likesReceived: [{ type: ObjectId, ref: "User" }],
     role: {
         type: String,
-        default: "user"
+        enum:["User", "Admin","Mod"],
+        default: "User"
     }
 });
 
