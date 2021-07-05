@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         unique: true,
     },
-    gender:{
+    gender: {
         type: String,
         enum: ["MALE", "FEMALE", "NONBINARY"]
     },
@@ -44,19 +44,40 @@ const userSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
+    usertype: {
+        type: String,
+        enum: ["FREE", "PRO"],
+        default: "FREE"
+    },
+    job: {
+        type: String,
+        trim: true,
+    },
+    company: {
+        type: String,
+        trim: true,
+    },
+    school: {
+        type: String,
+        trim: true
+    },
+    livesIn: {
+        type: String,
+        trim: true,
+    },
     resetPasswordLink: {
         data: String,
         default: ""
     },
-    createdAt:{
-        type:Date,
-        default:Date.now,
+    createdAt: {
+        type: Date,
+        default: Date.now,
     },
     likesSent: [{ type: ObjectId, ref: "User" }],
     likesReceived: [{ type: ObjectId, ref: "User" }],
     role: {
         type: String,
-        enum:["user", "admin","mod"],
+        enum: ["user", "admin", "mod"],
         default: "user"
     }
 });

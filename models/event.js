@@ -8,14 +8,37 @@ const { ObjectId } = mongoose.Schema;
 
 const eventSchema = new mongoose.Schema({
 
-    owner:{
+    event_owner: {
         type: ObjectId,
-        ref:"EventOwner"
+        ref: "EventOwner"
     },
-    users:[{
-        type:ObjectId,
-        ref:"User",
-    }]
+    event_name: {
+        type: String,
+        trim: true,
+    },
+    event_cover: {
+        data: buffer,
+        contentType: String,
+    },
+    event_location: {
+        type: Stirng,
+        trim: true,
+    },
+    start_date: {
+        type: Date
+    },
+    end_date: {
+        type: Date
+    },
+    users: [{
+        type: ObjectId,
+        ref: "User",
+    }],
+    event_status: {
+        type: String,
+        enum: ["INCOMING", "HAPPENING", "ENDED"],
+        default: "INCOMING",
+    }
 })
 
 module.exports = mongoose.model("Event", eventSchema)

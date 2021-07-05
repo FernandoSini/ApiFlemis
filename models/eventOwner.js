@@ -32,10 +32,6 @@ const eventOwnerSchema = new mongoose.Schema({
         data: Buffer, // envio das imagens em forma binaria, e será armazenado e convertido no content type
         contentType: String,
     },
-    about: {
-        type: String,
-        trim: true,
-    },
     resetPasswordLink: {
         data: String,
         default: ""
