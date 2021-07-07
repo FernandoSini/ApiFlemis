@@ -13,14 +13,11 @@ const fs = require("fs")
 dotenv.config()
 // const cors = require("cors")
 //isso aqui foi adicionado junto a pasta public
-app.use(express.static(path.join(__dirname, 'public')))
-app.set('views', path.join(__dirname, 'public'))
-app.engine('html', require('ejs').renderFile)
-app.set('view engine', 'html');
-app.use(morgan("dev"))
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }))
-app.use(cookieParser());
+// app.use(express.static(path.join(__dirname, 'public')))
+// app.set('views', path.join(__dirname, 'public'))
+// app.engine('html', require('ejs').renderFile)
+// app.set('view engine', 'html');
+
 
 //conectando no mongo
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true },)
@@ -31,13 +28,13 @@ mongoose.connection.on("error", err => {
     console.log(`Error in your connection: ${err.message}`);
 });
 
-/*app.use("/", (req, res) => {
-    return res.status(404).json({ error: "erro" })
-})*/
-/*//isso aqui foi adicionado
-app.use("/socket", (req, res) => {
-    return res.render("index.html");
-})*/
+// app.get("/", (req, res) => {
+//     return res.status(404).json({ error: "erro" })
+// })
+//isso aqui foi adicionado
+// app.get("/socket/app", (req, res) => {
+//     return res.render("index.html");
+// })
 
 let messages = []
 io.on("connection", socket => {
@@ -59,7 +56,10 @@ app.use(function (req, res, next) {
     next();
 });
 
-
+app.use(morgan("dev"))
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }))
+app.use(cookieParser());
 app.use((err, req, res, next) => {
     console.log(err.stack);
     if (res.statusCode === 400) {
