@@ -11,6 +11,7 @@ var cookieParser = require("cookie-parser")
 const dotenv = require("dotenv")
 const fs = require("fs")
 dotenv.config()
+const rotasAuth = require("./routes/auth")
 // const cors = require("cors")
 //isso aqui foi adicionado junto a pasta public
 // app.use(express.static(path.join(__dirname, 'public')))
@@ -37,31 +38,53 @@ mongoose.connection.on("error", err => {
 // })
 
 let messages = []
-io.on("connection", socket => {
-    console.log("socket id" + socket.id);
+// io.of("/fodase").on("connection", socket => {
+//     console.log("socket id" + socket.id);
 
-    socket.emit("previousMessage", messages)
+//     socket.emit("previousMessage", messages)
 
-    socket.on('sendMessage', data => {
-        messages.push(data);
-        socket.broadcast.emit('receivedMessage', data)
-    });
-})
+//     socket.on('sendMessage', msg => {
+//         messages.push(msg);
+//         socket.emit('receivedMessage', m)
+//     });
+// })
+
+// var clients = {}
+// io.of("/fodase").on("connection", (socket) => {
+//     console.log("connetetd");
+//     console.log(socket.id, "has joined");
+//     socket.on("signIn", (id) => {
+//         console.log(id);
+//         clients[id] = socket;
+//         console.log(clients);
+//     });
+//     socket.on("sendMessage", (msg) => {
+//         console.log(msg);
+//         let targetId = msg.targetId;
+//         if (clients[targetId]) clients[targetId].emit("sendMessage", msg);
+//     });
+// });
+
 
 
 app.use(function (req, res, next) {
-    /* res.header("Access-Control-Allow-Origin", "*");
-     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");*/
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
     next();
 });
 
 app.use(morgan("dev"))
+app.use(expressValidator())
+app.use(express.Router())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser());
+
+app.use("/", rotasAuth)
+
+
 app.use((err, req, res, next) => {
-    console.log(err.stack);
     if (res.statusCode === 400) {
         return res.status(400).json({ error: "Bad Request!" })
     }
@@ -80,7 +103,7 @@ app.use((err, req, res, next) => {
     if (res.statusCode === 502) {
         return res.status(502).json({ error: "Bad Gateway" })
     }
-    next()
+
 
 
 })

@@ -6,7 +6,12 @@ const { ObjectId } = mongoose.Schema;
 // const Post = require('./post')
 //teste pra poder adicionar no git
 const userSchema = new mongoose.Schema({
-    name: {
+    username: {
+        type: String,
+        trim: true,
+        required: true,
+    },
+    firstname: {
         type: String,
         trim: true,
         required: true,
@@ -37,8 +42,10 @@ const userSchema = new mongoose.Schema({
     },
     salt: String,// permite gerar string randomicamentee
     avatar_profile: {
-        data: Buffer, // envio das imagens em forma binaria, e será armazenado e convertido no content type
-        contentType: String,
+        // data: Buffer, // envio das imagens em forma binaria, e será armazenado e convertido no content type
+        // contentType: String,
+        type: String,
+        trim: true
     },
     about: {
         type: String,
@@ -65,6 +72,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
+    photos: [{
+        type: String,
+        trim: true,
+    }],
     resetPasswordLink: {
         data: String,
         default: ""
@@ -77,7 +88,7 @@ const userSchema = new mongoose.Schema({
     likesReceived: [{ type: ObjectId, ref: "User" }],
     role: {
         type: String,
-        enum: ["user", "admin", "mod"],
+        enum: ["user", "admin", "moderator"],
         default: "user"
     }
 });
