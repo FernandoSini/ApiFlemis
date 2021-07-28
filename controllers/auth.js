@@ -17,7 +17,7 @@ exports.register = async (req, res) => {
 
     const newUser = await new User(req.body);
     await newUser.save();
-    return res.status.json({ message: "User registered successfully! Please make Login!" })
+    return res.status(200).json({ message: "User registered successfully! Please make Login!" })
 }
 
 exports.login = (req, res) => {
@@ -27,18 +27,18 @@ exports.login = (req, res) => {
         if (err || !user) {
             return res.status(401).json({ error: "User with this email not found. Please register!" })
         }
-    
 
-    if (!user.authenticate(password)) {
-        return res.status(401).json({ error: "Email and password not found" })
-    }
 
-    const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET)
-    res.cookie("token", token, { expire: new Date() + 9999 });
-    
-    const { _id, username, firstname, lastname, birthday, gender, roleUser, email, avatar_profile, about, usertype, job, livesin, school, company, photos, role } = user;
-    return res.json({user: { _id, username, firstname, lastname, birthday, gender, roleUser, email, avatar_profile, about, usertype, job, livesin, school, company, photos, role },token })
-})
+        if (!user.authenticate(password)) {
+            return res.status(401).json({ error: "Email and password not found" })
+        }
+
+        const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET)
+        res.cookie("token", token, { expire: new Date() + 9999 });
+
+        const { _id, username, firstname, lastname, birthday, gender, roleUser, email, avatar_profile, about, usertype, job, livesin, school, company, photos, likesSent, likesReceived, matches, role, createdAt } = user;
+        return res.json({ user: { _id, username, firstname, lastname, birthday, gender, roleUser, email, avatar_profile, about, usertype, job, livesin, school, company, photos, likesSent, likesReceived, matches, role, createdAt }, token })
+    })
 }
 exports.requireLogin = expressJwt({
     secret: process.env.JWT_SECRET,

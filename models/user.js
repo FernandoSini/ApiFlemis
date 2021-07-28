@@ -23,11 +23,11 @@ const userSchema = new mongoose.Schema({
     },
     birthday: {
         type: String,
-        unique: true,
     },
     gender: {
         type: String,
-        enum: ["MALE", "FEMALE", "NONBINARY"]
+        enum: ["MALE", "FEMALE", "NONBINARY"],
+        default: "MALE"
     },
     email: {
         type: String,
@@ -86,6 +86,7 @@ const userSchema = new mongoose.Schema({
     },
     likesSent: [{ type: ObjectId, ref: "User" }],
     likesReceived: [{ type: ObjectId, ref: "User" }],
+    matches: [{ type: ObjectId, ref: "Matches" }],
     role: {
         type: String,
         enum: ["user", "admin", "moderator"],
