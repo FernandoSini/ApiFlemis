@@ -12,10 +12,11 @@ const dotenv = require("dotenv")
 const fs = require("fs")
 dotenv.config()
 const rotasAuth = require("./routes/auth")
+const rotasUser = require("./routes/user")
 // const cors = require("cors")
 //isso aqui foi adicionado junto a pasta public
 // app.use(express.static(path.join(__dirname, 'public')))
-// app.set('views', path.join(__dirname, 'public'))
+app.set('views', path.join(__dirname, 'public'))
 // app.engine('html', require('ejs').renderFile)
 // app.set('view engine', 'html');
 
@@ -82,6 +83,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser());
 
 app.use("/", rotasAuth)
+app.use("/", rotasUser)
 
 
 app.use((err, req, res, next) => {

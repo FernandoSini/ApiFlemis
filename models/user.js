@@ -41,11 +41,15 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
     salt: String,// permite gerar string randomicamentee
-    avatar_profile: {
-        // data: Buffer, // envio das imagens em forma binaria, e será armazenado e convertido no content type
-        // contentType: String,
-        type: String,
-        trim: true
+    // avatar_profile: {
+    //     // data: Buffer, // envio das imagens em forma binaria, e será armazenado e convertido no content type
+    //     contentType: String,
+    //     type: String,
+    //     trim: true
+    // },
+    avatar_profile:{
+        type:ObjectId,
+        ref:"Avatar"
     },
     about: {
         type: String,

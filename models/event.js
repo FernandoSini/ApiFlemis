@@ -1,5 +1,4 @@
 const mongoose = require("mongoose")
-const mongoose = require("mongoose")
 const uuidv1 = require("uuidv1") //caso dê algum erro no uuid, deve trocar const por let ou então tentar essa solução const { v1: uuidv1 } = require('uuid');
 const crypto = require("crypto") //modulo responsavel por encriptografar as senhas
 const { type } = require("os");
@@ -10,7 +9,7 @@ const eventSchema = new mongoose.Schema({
 
     event_owner: {
         type: ObjectId,
-        ref: "EventOwner"
+        ref: "User"
     },
     event_name: {
         type: String,
