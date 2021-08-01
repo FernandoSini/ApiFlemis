@@ -77,8 +77,8 @@ const userSchema = new mongoose.Schema({
         trim: true,
     },
     photos: [{
-        type: String,
-        trim: true,
+       type:ObjectId,
+       ref:"UserPhoto"
     }],
     resetPasswordLink: {
         data: String,
