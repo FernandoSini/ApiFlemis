@@ -37,7 +37,11 @@ const eventSchema = new mongoose.Schema({
         type: String,
         enum: ["INCOMING", "HAPPENING", "ENDED"],
         default: "INCOMING",
-    }
+    },
+    eventPhotos: [{
+        type: ObjectId,
+        ref: "EventPhoto",
+    }]
 })
 
 module.exports = mongoose.model("Event", eventSchema)

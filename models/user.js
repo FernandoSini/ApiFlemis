@@ -47,9 +47,9 @@ const userSchema = new mongoose.Schema({
     //     type: String,
     //     trim: true
     // },
-    avatar_profile:{
-        type:ObjectId,
-        ref:"Avatar"
+    avatar_profile: {
+        type: ObjectId,
+        ref: "Avatar"
     },
     about: {
         type: String,
@@ -88,9 +88,26 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
-    likesSent: [{ type: ObjectId, ref: "User" }],
-    likesReceived: [{ type: ObjectId, ref: "User" }],
-    matches: [{ type: ObjectId, ref: "Matches" }],
+    likesSent: [{
+        type: ObjectId,
+        ref: "User"
+    }],
+    likesReceived: [{
+        type: ObjectId,
+        ref: "User"
+    }],
+    matches: [{
+        type: ObjectId,
+        ref: "Matches"
+    }],
+    eventsGoing: [{
+        type: ObjectId,
+        ref: "Event"
+    }],
+    eventsCreated: [{
+        type: ObjectId,
+        ref: "Event"
+    }],
     role: {
         type: String,
         enum: ["user", "admin", "moderator"],
