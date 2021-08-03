@@ -6,20 +6,20 @@ exports.userRegisterValidator = (req, res, next) => {
     //verificiando se o texto esta entre 4 a 150 caracteres
     req.check('firstname', 'Name must be between 3 to 10 characters').isLength({
         min: 3,
-        max: 10
+        // max: 10
     })
     req.check('lastname', 'Lastname is required').notEmpty()
     //verificiando se o texto esta entre 4 a 150 caracteres
     req.check('lastname', 'Name must be between 3 to 10 characters').isLength({
         min: 3,
-        max: 10
+        // max: 10
     })
     //verificando se o o username não está vazio e seje entre 4 a 10 caracteres
     req.check('username', 'Username  is required').notEmpty()
     //verificiando se o texto esta entre 4 a 150 caracteres
     req.check('username', 'Username must be between 3 to 13 characters').isLength({
         min: 3,
-        max: 13
+        // max: 13
     })
     //email
     //verificando se o email não está vazio, valido e normalizadp

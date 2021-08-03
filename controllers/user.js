@@ -6,12 +6,13 @@ const fs = require("fs")
 const _ = require("lodash")
 const path = require("path")
 const Avatar = require("../models/avatar")
-const user = require("../models/user")
+
 
 exports.userById = (req, res, next, id) => {
     User.findById(id)
-        .populate("likesSent", "_id username avatar_profile photos")
+        .populate("likesSent", "_id username avatar_profile")
         .populate("likesReceived", "_id username avatar_profile")
+        .populate("avatar_profile  path filename contentType")
         .exec((err, user) => {
             if (err) {
                 return res.satus(400).json({ error: "User not found" })
@@ -25,14 +26,22 @@ exports.targetUserById = (req, res, next, id) => {
     User.findById(id)
         .populate("likesSent", "_id username avatar_profile photos")
         .populate("likesReceived", "_id username avatar_profile")
-        .exec((err, user) => {
+        .exec((err, targetUser) => {
             if (err) {
                 return res.status(400).json({ error: "User not found" })
             }
             //criando o objeto profile com as infos do usuario
-            req.profile = user;
+            req.userTarget = targetUser;
+            req.userTarget.hashed_password = undefined;
+            req.userTarget.salt = undefined;
             next()
         });
+}
+exports.getUserProfile = (req, res) => {
+    req.profile.hashed_password = undefined;
+    req.profile.salt = undefined;
+    console.log(req.profile)
+    return res.status(200).json(req.profile)
 }
 
 const avatarStorage = multer.diskStorage({
@@ -131,12 +140,14 @@ exports.uploadAvatar = async (req, res, next) => {
                 userData.save()
 
                 return res.json(result)
+
             })
 
         } else {
 
             let user = req.profile;
             console.log("foda-se")
+            console.log(req.profile)
 
             await Avatar.findOneAndUpdate({ refUser: user._id },
                 { filename: req.file.filename, path: req.file.path, contentType: req.file.mimetype },
@@ -148,12 +159,9 @@ exports.uploadAvatar = async (req, res, next) => {
                     user.avatar_profile = result._id;
                     user.save();
                     return res.status(200).json(result);
+
                 })
-
-
         }
-
-
 
     } catch (e) {
         console.log("aqui")
@@ -206,7 +214,7 @@ exports.uploadAvatar = async (req, res, next) => {
 
 //     }
 // }
-exports.getAvatar = (req, res, next) => {
+exports.getAvatar = (req, res) => {
     console.log(req.profile.avatar_profile)
     if (req.profile.avatar_profile) {
         // return res.json("http://localhost:3000/api/" + req.profile.avatar_profile);
@@ -215,22 +223,39 @@ exports.getAvatar = (req, res, next) => {
     }
 }
 
-exports.likeUser = (req, res) => {
-    console.log(req.body.targetUserId);
-    User.findByIdAndUpdate(req.body.targetUserId,
-        {
-            $push: { likesSent: req.body.userId },
-        },
-        {
-            $new: true
-        }
-    ).exec((err, result) => {
-        if (err) {
-            return res.status(400).json({ error: err },)
-        } else {
-            return res.status(200).json(result);
-        }
-    })
+exports.likeUser = async (req, res) => {
+    console.log(req.profile);
+    console.log(req.userTarget)
+    let you = req.profile;
+    let targetUser = req.userTarget;
+
+    let likeExists = await User.exists({ likesSent: targetUser._id })
+    console.log(likeExists)
+    if (likeExists) {
+        return res.status(400).json({ error: "User already liked" });
+    } else {
+        User.findByIdAndUpdate(targetUser._id,
+            {
+                $push: { likesReceived: you._id },
+            },
+            {
+                $new: true
+            }
+        ).populate("likesReceived", "_id username avatar_profile")
+            .exec((err, result) => {
+                if (err) {
+                    return res.status(400).json({ error: err },)
+                } else {
+
+                    result.hashed_password = undefined;
+                    result.salt = undefined;
+                    return res.status(200).json(result);
+                }
+
+            })
+        you.likesSent = req.userTarget._id;
+        you.save();
+    }
 }
 
 
@@ -251,6 +276,7 @@ exports.unlike = (req, res) => {
             res.json(result);
         }
     })
+
 }
 
 
