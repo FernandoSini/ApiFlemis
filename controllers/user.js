@@ -12,7 +12,7 @@ exports.userById = (req, res, next, id) => {
     User.findById(id)
         .populate("likesSent", "_id username avatar_profile")
         .populate("likesReceived", "_id username avatar_profile")
-        .populate("avatar_profile  path filename contentType")
+        .populate("avatar_profile path filename contentType")
         .exec((err, user) => {
             if (err) {
                 return res.satus(400).json({ error: "User not found" })
@@ -24,7 +24,7 @@ exports.userById = (req, res, next, id) => {
 }
 exports.targetUserById = (req, res, next, id) => {
     User.findById(id)
-        .populate("likesSent", "_id username avatar_profile photos")
+        .populate("likesSent", "_id username avatar_profile")
         .populate("likesReceived", "_id username avatar_profile")
         .exec((err, targetUser) => {
             if (err) {
@@ -214,15 +214,27 @@ exports.uploadAvatar = async (req, res, next) => {
 
 //     }
 // }
-exports.getAvatar = (req, res) => {
+exports.getAvatar = (req, res, next) => {
     console.log(req.profile.avatar_profile)
     if (req.profile.avatar_profile) {
         // return res.json("http://localhost:3000/api/" + req.profile.avatar_profile);
 
         res.sendFile(__dirname + req.profile.avatar_profile)
     }
+    next()
 }
 
+exports.updateUser = (req, res) => {
+    User.findByIdAndUpdate(req.body.yourId, {
+        $set: req.body
+    }).exec((err, data) => {
+        if (err || !data) {
+            return res.status(400).json({ err: "Can't updateData" })
+        } else {
+            return res.status(200).json("User updated successfully")
+        }
+    })
+}
 exports.likeUser = async (req, res) => {
     console.log(req.profile);
     console.log(req.userTarget)
@@ -277,6 +289,22 @@ exports.unlike = (req, res) => {
         }
     })
 
+}
+
+exports.hasAuthorization = (req, res) => {
+    //verificando se o usuário logado é o mesmo de quem está vendo o perfil ou é admin/mod
+    let sameUser = req.profile && req.auth && req.profile._id === req.auth._id;
+    let adminUser = req.profile && req.auth && req.auth.role === "admin";
+
+    const isAuthorized = sameUser || adminUser;
+    console.log("SameUser", sameUser)
+    console.log("adminUser", adminUser)
+    console.log(req.profile)
+    console.log(req.auth);
+    if (!isAuthorized) {
+        return res.status(403).json({ error: "User not authorized" })
+    }
+    next()
 }
 
 

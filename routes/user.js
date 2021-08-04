@@ -7,7 +7,7 @@ const { requireLogin } = require("../controllers/auth");
 //criando as rotas
 router.get("/api/users")
 router.get("/api/users/profile/:userId", getUserProfile)
-router.get("/api/users/you/edit/:userId",)
+router.put("/api/users/you/edit/:userId", updateUser)
 router.get("/api/users/gender/find/different/:gender")
 router.get("/api/users/avatar/:userId")
 router.get("/api/users/photos/:userId")
