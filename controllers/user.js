@@ -242,11 +242,16 @@ exports.likeUser = async (req, res) => {
     let targetUser = req.userTarget;
 
     let likeExists = await User.exists({ likesSent: targetUser._id })
-    console.log(likeExists)
+    let targetLikeYouExists = await User.exists({ likesReceived: targetUser._id })
+
     if (likeExists) {
+        console.log(targetUser.likesReceived)
+        // console.log(you.likesReceived.includes(targetUser._id));
         return res.status(400).json({ error: "User already liked" });
+    } else if (likeExists && targetLikeYouExists) {
+
     } else {
-        User.findByIdAndUpdate(targetUser._id,
+        await User.findByIdAndUpdate(targetUser._id,
             {
                 $push: { likesReceived: you._id },
             },
@@ -265,8 +270,10 @@ exports.likeUser = async (req, res) => {
                 }
 
             })
-        you.likesSent = req.userTarget._id;
+        you.likesSent = targetUser._id;
         you.save();
+
+
     }
 }
 
@@ -291,7 +298,7 @@ exports.unlike = (req, res) => {
 
 }
 
-exports.hasAuthorization = (req, res) => {
+exports.hasAuthorization = (req, res, next) => {
     //verificando se o usuário logado é o mesmo de quem está vendo o perfil ou é admin/mod
     let sameUser = req.profile && req.auth && req.profile._id === req.auth._id;
     let adminUser = req.profile && req.auth && req.auth.role === "admin";
@@ -307,6 +314,35 @@ exports.hasAuthorization = (req, res) => {
     next()
 }
 
+exports.deleteUser = (req, res, next) => {
+
+    let user = req.profile;
+    user.remove((err, result) => {
+        if (err || !result) {
+            return res.status(400).json({ error: err });
+        } else {
+            return res.status(200).json({ message: "User deleted successfully" })
+        }
+
+
+    })
+}
+
+exports.getUserByDifferentGender = (req, res) => {
+    User.find({ gender: { $ne: req.body.gender } }).exec((err, users) => {
+        if (err || !users) {
+            return res.status(400).json({ error: err })
+        } else {
+            users.forEach(element => {
+                element.hashed_password = undefined;
+                element.salt = undefined;
+            })
+            return res.status(200).json(users);
+        }
+
+    })
+
+}
 
 
 

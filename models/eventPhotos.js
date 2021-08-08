@@ -7,7 +7,6 @@ const { ObjectId } = mongoose.Schema;
 
 const eventPhotosSchema = new mongoose.Schema({
 
-
     refUser: {
         type: ObjectId,
         ref: "User",
@@ -31,4 +30,4 @@ const eventPhotosSchema = new mongoose.Schema({
 
 })
 
-module.exports = mongoose.model("EventPhoto", avatarSchema)
+module.exports = mongoose.model("EventPhoto", eventPhotosSchema)

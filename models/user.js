@@ -77,8 +77,8 @@ const userSchema = new mongoose.Schema({
         trim: true,
     },
     photos: [{
-       type:ObjectId,
-       ref:"UserPhoto"
+        type: ObjectId,
+        ref: "UserPhoto"
     }],
     resetPasswordLink: {
         data: String,
@@ -98,7 +98,7 @@ const userSchema = new mongoose.Schema({
     }],
     matches: [{
         type: ObjectId,
-        ref: "Matches"
+        ref: "Match"
     }],
     eventsGoing: [{
         type: ObjectId,

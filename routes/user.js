@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { userById, updateUser, targetUserById, getAvatar, avatarUpload, uploadAvatar, likeUser, getUserProfile } = require("../controllers/user")
+const { userById, updateUser, targetUserById, getAvatar, avatarUpload, uploadAvatar, likeUser, getUserProfile ,deleteUser, getUserByDifferentGender } = require("../controllers/user")
 const { requireLogin } = require("../controllers/auth");
 
 
@@ -8,13 +8,13 @@ const { requireLogin } = require("../controllers/auth");
 router.get("/api/users")
 router.get("/api/users/profile/:userId", getUserProfile)
 router.put("/api/users/you/edit/:userId", updateUser)
-router.get("/api/users/gender/find/different/:gender")
+router.get("/api/users/gender/find/different/", getUserByDifferentGender)
 router.get("/api/users/avatar/:userId")
 router.get("/api/users/photos/:userId")
 router.put("/api/users/:userId/upload/avatar", avatarUpload.single("img"), uploadAvatar)
 router.get("/api/users/:userId/avatar", getAvatar)
 router.post("/api/users/:userId/photo/upload")
-router.delete("/api/users/delete/:userId")
+router.delete("/api/users/delete/:userId", deleteUser)
 // router.put("/api/users/update/:userId", updateUser)
 router.put("/api/user/:userId/like/:targetUserId", likeUser)
 

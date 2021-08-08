@@ -34,7 +34,7 @@ exports.login = (req, res) => {
         }
 
         const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET)
-        res.cookie("token", token, { expire: new Date() + 9999 });
+        res.cookie("token", token, { expiresIn: new Date() + 9999 });
 
         const { _id, username, firstname, lastname, birthday, gender, roleUser, email, avatar_profile, about, usertype, job, livesin, school, company, photos, likesSent, likesReceived, matches, role, createdAt } = user;
         return res.json({ user: { _id, username, firstname, lastname, birthday, gender, roleUser, email, avatar_profile, about, usertype, job, livesin, school, company, photos, likesSent, likesReceived, matches, role, createdAt }, token })

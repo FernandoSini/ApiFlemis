@@ -13,6 +13,7 @@ const fs = require("fs")
 dotenv.config()
 const rotasAuth = require("./routes/auth")
 const rotasUser = require("./routes/user")
+const rotasEvents = require("./routes/event")
 // const cors = require("cors")
 //isso aqui foi adicionado junto a pasta public
 // app.use(express.static(path.join(__dirname, 'public')))
@@ -84,31 +85,45 @@ app.use(cookieParser());
 
 app.use("/", rotasAuth)
 app.use("/", rotasUser)
+app.use("/", rotasEvents)
 
 
 app.use((err, req, res, next) => {
-    if (res.statusCode === 400) {
+    console.log(err)
+    if (err.status === 400) {
         return res.status(400).json({ error: "Bad Request!" })
     }
-    if (res.statusCode === 401) {
+    if (err.status === 401) {
+        console.log(err)
         return res.status(401).json({ error: "Unauthorized!" })
     }
-    if (res.statusCode === 403) {
+    if (err.status === 403) {
         return res.status(403).json({ error: "Forbidden! You Need the permission to do that!" })
-    } if (res.statusCode === 404) {
+    } if (err.status === 404) {
         return res.status(404).json({ error: "Not found!" })
     }
 
-    if (res.statusCode === 500) {
+    if (err.status === 500) {
         return res.status(500).json({ error: "Internal Server Error" })
     }
-    if (res.statusCode === 502) {
+    if (err.status === 502) {
         return res.status(502).json({ error: "Bad Gateway" })
     }
 
+    if (err.status === undefined) {
+        return res.json(err);
+    }
 
 
 })
+// app.use(function (err, req, res, next) {
+//     console.log(err.statusCode)
+//     console.log(err.status)
+//     if (err.name === "UnauthorizedError") {
+//         res.status(401).send({ error: "Unauthorized!" })
+
+//     }
+// })
 
 
 const port = process.env.PORT || 3000;

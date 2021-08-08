@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
-const { ObjectId } = mongoose.schema
+const { ObjectId } = mongoose.Schema
 
 //teste para poder adicionar no git
-const matchSchema = new mongoose.schema({
+const matchSchema = new mongoose.Schema({
 
     user1: {
         type: ObjectId,
@@ -16,4 +16,4 @@ const matchSchema = new mongoose.schema({
 })
 
 
-module.exports = mongoose.model('Matches', matchSchema)
+module.exports = mongoose.model('Match', matchSchema)
