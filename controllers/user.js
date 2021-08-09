@@ -18,6 +18,8 @@ exports.userById = (req, res, next, id) => {
                 return res.satus(400).json({ error: "User not found" })
             }
             //criando o objeto profile com as infos do usuario
+            user.hashed_password = undefined;
+            user.salt = undefined;
             req.profile = user;
             next()
         });
@@ -217,9 +219,9 @@ exports.uploadAvatar = async (req, res, next) => {
 exports.getAvatar = (req, res, next) => {
     console.log(req.profile.avatar_profile)
     if (req.profile.avatar_profile) {
-        // return res.json("http://localhost:3000/api/" + req.profile.avatar_profile);
+        return res.json(`http://localhost:3000/api/${req.profile.avatar_profile.path}`);
 
-        res.sendFile(__dirname + req.profile.avatar_profile)
+        // res.sendFile(req.profile.avatar_profile.path)
     }
     next()
 }

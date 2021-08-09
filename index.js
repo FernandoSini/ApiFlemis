@@ -14,6 +14,7 @@ dotenv.config()
 const rotasAuth = require("./routes/auth")
 const rotasUser = require("./routes/user")
 const rotasEvents = require("./routes/event")
+const rotasMatch = require("./routes/match")
 // const cors = require("cors")
 //isso aqui foi adicionado junto a pasta public
 // app.use(express.static(path.join(__dirname, 'public')))
@@ -82,10 +83,12 @@ app.use(express.Router())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser());
+app.use("/api/uploads/user/avatar", express.static('./uploads/user/avatar'))
 
 app.use("/", rotasAuth)
 app.use("/", rotasUser)
 app.use("/", rotasEvents)
+app.use("/", rotasMatch)
 
 
 app.use((err, req, res, next) => {

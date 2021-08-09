@@ -5,9 +5,9 @@ const multer = require("multer")
 
 exports.getEventById = (req, res, next, id) => {
     Event.findById(id)
-        .populate("event_owner username firstname lastname")
-        .populate("users username firstname lastname")
-        .populate("event_photo path contentType filename")
+        .populate("event_owner", "username firstname lastname")
+        .populate("users" ,"username firstname lastname")
+        .populate("event_photo" ,"path contentType filename")
         .exec((err, event) => {
             if (err) {
                 return res.status(400).json({ err: err })
@@ -42,7 +42,7 @@ exports.createEvent = async (req, res) => {
 }
 exports.getSingleEvent = async (req, res) => {
     await Event.findById(req.eventId._id)
-        .populate("event_owner firstname lastname username")
+        .populate("event_owner"," firstname lastname username")
         .exec((err, event) => {
             if (err) {
                 return res.status(400).json(err)
@@ -70,7 +70,7 @@ exports.getSingleEvent = async (req, res) => {
 
 exports.getEvents = async (req, res) => {
     await Event.find()
-        .populate("event_owner username firstname lastname")
+        .populate("event_owner", "username firstname lastname")
         .exec((err, eventList) => {
             if (err) {
                 return res.status(400).json(err)
