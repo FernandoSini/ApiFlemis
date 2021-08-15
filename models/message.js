@@ -3,27 +3,24 @@ const uuidv1 = require("uuidv1") //caso dê algum erro no uuid, deve trocar cons
 const crypto = require("crypto") //modulo responsavel por encriptografar as senhas
 const { type } = require("os");
 const { ObjectId } = mongoose.Schema;
+// const Post = require('./post')
+//teste pra poder adicionar no git
+const messageSchema = new mongoose.Schema({
 
-
-const userPhotoSchema = new mongoose.Schema({
-
-    refUser: {
+    from: {
         type: ObjectId,
-        ref: "User",
+        ref: "User"
     },
-    contentType: {
+    content: {
         type: String,
         trim: true
     },
-    path: {
-        type: String,
-        trim: true
-    },
-    filename: {
-        type: String,
-        trim: true
+    target: {
+        type: ObjectId,
+        ref: "User"
     }
 
-})
+});
 
-module.exports = mongoose.model("UserPhoto", userPhotoSchema)
+
+module.exports = mongoose.model("Message", messageSchema);

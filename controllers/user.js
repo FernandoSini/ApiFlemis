@@ -12,14 +12,14 @@ exports.userById = (req, res, next, id) => {
     User.findById(id)
         .populate("likesSent", "_id username avatar_profile")
         .populate("likesReceived", "_id username avatar_profile")
-        .populate("avatar_profile path filename contentType")
+        .populate("avatar_profile", "path filename contentType")
         .exec((err, user) => {
             if (err) {
                 return res.satus(400).json({ error: "User not found" })
             }
             //criando o objeto profile com as infos do usuario
-            user.hashed_password = undefined;
-            user.salt = undefined;
+            // user.hashed_password = undefined;
+            // user.salt = undefined;
             req.profile = user;
             next()
         });
@@ -134,7 +134,7 @@ exports.uploadAvatar = async (req, res, next) => {
                 filename: req.file.filename
             });
             console.log("fala ai galera")
-            avatarCreate.save((error, result) => {
+            await avatarCreate.save((error, result) => {
                 if (error) {
                     return res.status(400).json(error);
                 }
@@ -146,7 +146,6 @@ exports.uploadAvatar = async (req, res, next) => {
             })
 
         } else {
-
             let user = req.profile;
             console.log("foda-se")
             console.log(req.profile)
@@ -238,20 +237,24 @@ exports.updateUser = (req, res) => {
     })
 }
 exports.likeUser = async (req, res) => {
-    console.log(req.profile);
-    console.log(req.userTarget)
+    // console.log("profile: " + req.profile);
+    // console.log("target: " + req.userTarget)
     let you = req.profile;
     let targetUser = req.userTarget;
 
-    let likeExists = await User.exists({ likesSent: targetUser._id })
-    let targetLikeYouExists = await User.exists({ likesReceived: targetUser._id })
+
+    var likeExists = you.likesSent.map(element => element._id).includes(targetUser._id)
+    console.log(likeExists)
+    var targetLikeYouExists = you.likesReceived.map(element => element._id).includes(targetUser._id);
+    console.log(targetLikeYouExists)
 
     if (likeExists) {
-        console.log(targetUser.likesReceived)
-        // console.log(you.likesReceived.includes(targetUser._id));
-        return res.status(400).json({ error: "User already liked" });
-    } else if (likeExists && targetLikeYouExists) {
 
+        if (likeExists && targetLikeYouExists) {
+            return res.status(400).json({ error: "We have a match" })
+        } else {
+            return res.status(400).json({ error: "User already liked!" })
+        }
     } else {
         await User.findByIdAndUpdate(targetUser._id,
             {
@@ -261,6 +264,7 @@ exports.likeUser = async (req, res) => {
                 $new: true
             }
         ).populate("likesReceived", "_id username avatar_profile")
+            .populate("likesSent", "_id username avatar_profile")
             .exec((err, result) => {
                 if (err) {
                     return res.status(400).json({ error: err },)
@@ -272,11 +276,11 @@ exports.likeUser = async (req, res) => {
                 }
 
             })
-        you.likesSent = targetUser._id;
+        you.likesSent.push(targetUser._id);
         you.save();
-
-
     }
+
+
 }
 
 
@@ -302,7 +306,7 @@ exports.unlike = (req, res) => {
 
 exports.hasAuthorization = (req, res, next) => {
     //verificando se o usuário logado é o mesmo de quem está vendo o perfil ou é admin/mod
-    let sameUser = req.profile && req.auth && req.profile._id === req.auth._id;
+    let sameUser = req.profile && req.auth && req.profile._id == req.auth._id;
     let adminUser = req.profile && req.auth && req.auth.role === "admin";
 
     const isAuthorized = sameUser || adminUser;
@@ -344,6 +348,41 @@ exports.getUserByDifferentGender = (req, res) => {
 
     })
 
+}
+
+exports.getAllUsers = (req, res) => {
+    User.find()
+        .populate("avatar_profile", "_id path filename contentType")
+        .select('-matches -likesSent -likesReceived')
+        .exec((err, users) => {
+            if (err) {
+                return res.status(400).json(err);
+            } else {
+                users.forEach(element => {
+                    element.hashed_password = undefined;
+                    element.salt = undefined;
+                });
+                return res.status(200).json(users);
+            }
+        })
+}
+exports.getLikes = async (req, res) => {
+
+    await User.find(
+        { likesReceived: req.body.yourId },
+    )
+        .exec((err, users) => {
+            if (err) {
+                return res.status(400).json(err);
+            }
+            else {
+                users.forEach(element => {
+                    element.hashed_password = undefined;
+                    element.salt = undefined;
+                })
+                return res.status(200).json(users);
+            }
+        })
 }
 
 

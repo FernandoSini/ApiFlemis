@@ -22,29 +22,35 @@ exports.register = async (req, res) => {
 
 exports.login = (req, res) => {
 
-    const { email, password } = req.body;
-    User.findOne({ email: email }, (err, user) => {
-        if (err || !user) {
-            return res.status(401).json({ error: "User with this email not found. Please register!" })
-        }
+    const { username, password } = req.body;
+    User.findOne({ username: username })
+        .populate("avatar_profile", "_id contentType path filename")
+        .populate("likesSent", "_id username firstname lastname avatar_profile birthday")
+        .populate("likesReceived", "_id username firstname lastname avatar_profile birthday")
+        .exec((err, user) => {
+            if (err || !user) {
+                return res.status(401).json({ error: "User with this username not found. Please register!" })
+            }
 
 
-        if (!user.authenticate(password)) {
-            return res.status(401).json({ error: "Email and password not found" })
-        }
+            if (!user.authenticate(password)) {
+                return res.status(401).json({ error: "Username and password not found" })
+            }
 
-        const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET)
-        res.cookie("token", token, { expiresIn: new Date() + 9999 });
+            const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" })
+            res.cookie("token", token, { expiresIn: '1h' });
 
-        const { _id, username, firstname, lastname, birthday, gender, roleUser, email, avatar_profile, about, usertype, job, livesin, school, company, photos, likesSent, likesReceived, matches, role, createdAt } = user;
-        return res.json({ user: { _id, username, firstname, lastname, birthday, gender, roleUser, email, avatar_profile, about, usertype, job, livesin, school, company, photos, likesSent, likesReceived, matches, role, createdAt }, token })
-    })
+            const { _id, username, firstname, lastname, birthday, gender, roleUser, email, avatar_profile, about, usertype, job, livesin, school, company, photos, likesSent, likesReceived, matches, role, createdAt } = user;
+            return res.status(200).json({ _id, username, firstname, lastname, birthday, gender, roleUser, email, avatar_profile, about, usertype, job, livesin, school, company, photos, likesSent, likesReceived, matches, role, createdAt, token })
+        })
 }
+
 exports.requireLogin = expressJwt({
     secret: process.env.JWT_SECRET,
     userProperty: "auth",
     algorithms: ['HS256']
 })
+
 exports.logout = (req, res) => {
     res.clearCookie("token");
 

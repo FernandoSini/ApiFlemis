@@ -21,6 +21,7 @@ const rotasMatch = require("./routes/match")
 app.set('views', path.join(__dirname, 'public'))
 // app.engine('html', require('ejs').renderFile)
 // app.set('view engine', 'html');
+app.set("socketio", io)
 
 
 //conectando no mongo
@@ -48,25 +49,25 @@ let messages = []
 
 //     socket.on('sendMessage', msg => {
 //         messages.push(msg);
-//         socket.emit('receivedMessage', m)
+//         socket.emit('receivedMessage', msg)
 //     });
 // })
 
-// var clients = {}
-// io.of("/fodase").on("connection", (socket) => {
-//     console.log("connetetd");
-//     console.log(socket.id, "has joined");
-//     socket.on("signIn", (id) => {
-//         console.log(id);
-//         clients[id] = socket;
-//         console.log(clients);
-//     });
-//     socket.on("sendMessage", (msg) => {
-//         console.log(msg);
-//         let targetId = msg.targetId;
-//         if (clients[targetId]) clients[targetId].emit("sendMessage", msg);
-//     });
-// });
+var clients = {}
+io.of("/match/chat").on("connection", (socket) => {
+    console.log("connetetd");
+    console.log(socket.id, "has joined");
+    socket.on("signIn", (id) => {
+        console.log(id);
+        clients[id] = socket;
+        console.log(clients);
+    });
+    socket.on("sendMessage", (msg) => {
+        console.log(msg);
+        let targetId = msg.targetId;
+        if (clients[targetId]) clients[targetId].emit("sendMessage", msg);
+    });
+});
 
 
 
