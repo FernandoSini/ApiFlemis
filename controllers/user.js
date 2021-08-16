@@ -6,6 +6,7 @@ const fs = require("fs")
 const _ = require("lodash")
 const path = require("path")
 const Avatar = require("../models/avatar")
+const Match = require("../models/match")
 
 
 exports.userById = (req, res, next, id) => {
@@ -34,8 +35,6 @@ exports.targetUserById = (req, res, next, id) => {
             }
             //criando o objeto profile com as infos do usuario
             req.userTarget = targetUser;
-            req.userTarget.hashed_password = undefined;
-            req.userTarget.salt = undefined;
             next()
         });
 }
@@ -250,11 +249,18 @@ exports.likeUser = async (req, res) => {
 
     if (likeExists) {
 
-        if (likeExists && targetLikeYouExists) {
-            return res.status(400).json({ error: "We have a match" })
-        } else {
-            return res.status(400).json({ error: "User already liked!" })
-        }
+
+        // you.matches.push(match._id)
+        // you.save()
+        // targetUser.matches.push(match._id)
+        // targetUser.save()
+        // console.log(match)
+        // you.matches.push(match._id);
+        // targetUser.matches.push(match_id)
+        // return res.status(400).json({ error: "We have a match" })
+
+        return res.status(400).json({ error: "User already liked!" })
+
     } else {
         await User.findByIdAndUpdate(targetUser._id,
             {
@@ -272,12 +278,33 @@ exports.likeUser = async (req, res) => {
 
                     result.hashed_password = undefined;
                     result.salt = undefined;
+                    // if(likeExists && targetLikeYouExists){
+                    //     var match= new Match({user1:targetUser._id, user2:you._id }).save();
+                    //     }
+                    if (targetLikeYouExists) {
+                        let match = new Match({ user1: targetUser._id, user2: you._id });
+                        match.save((err, result) => {
+                            if (err) {
+                                return res.status(400).json({ error: err })
+                            }
+                            you.matches.push(result._id);
+                            you.save()
+                            targetUser.matches.push(result._id);
+                            targetUser.save()
+                            console.log(result)
+
+
+
+                        })
+                    }
                     return res.status(200).json(result);
                 }
 
             })
         you.likesSent.push(targetUser._id);
         you.save();
+
+
     }
 
 
@@ -335,18 +362,26 @@ exports.deleteUser = (req, res, next) => {
 }
 
 exports.getUserByDifferentGender = (req, res) => {
-    User.find({ gender: { $ne: req.body.gender } }).exec((err, users) => {
-        if (err || !users) {
-            return res.status(400).json({ error: err })
-        } else {
+    console.log(req.query.gender)
+    User.find({ gender: { $ne: req.query.gender } })
+        .populate("likesSent", "_id firstname lastname username birthday")
+        .populate("likesReceived", "_id firstname lastname username birthday")
+        .populate("avatar_profile", "_id path contentType filename")
+        .exec((err, users) => {
+            if (err || !users) {
+                if (!users || !users.length) {
+                    return res.status(404).json({ error: "Not Found!" })
+                }
+                return res.status(400).json({ error: err })
+            }
             users.forEach(element => {
                 element.hashed_password = undefined;
                 element.salt = undefined;
             })
             return res.status(200).json(users);
-        }
 
-    })
+
+        })
 
 }
 
@@ -385,5 +420,24 @@ exports.getLikes = async (req, res) => {
         })
 }
 
+exports.getLikesReceived = async (req, res) => {
+
+    await User.find({ likesSent: req.profile._id })
+        .populate("avatar_profile", "_id path contentType filename")
+        .select("-likesSent -likesReceived -gender -matches -eventsGoing -eventsCreated -email -createdAt -__v -photos")
+        .exec((err, usersLiked) => {
+            if (err) {
+                return res.status(400).json({ error: err })
+            }
+            if (!usersLiked.length) {
+                return res.status(404).json({ error: "Not found users who like you" })
+            }
+            usersLiked.forEach(element => {
+                element.hashed_password = undefined;
+                element.salt = undefined;
+            })
+            return res.status(200).json(usersLiked)
+        })
+}
 
 

@@ -5,9 +5,32 @@ const Match = require("../models/match")
 // const io = require("socket.io")(server)
 
 exports.getMatchesByUserId = (req, res) => {
+
     Match.find({ $or: [{ user1: req.profile._id }, { user2: req.profile._id }] })
-        .populate("user2", "username lastname firstname")
-        .populate("user1", "username lastname firstname")
+        // .populate("user2", "username lastname firstname avatar_profile")
+        .populate({
+            path: "user2", populate: {
+                path: "avatar_profile",
+                model: "Avatar",
+                select: "-refUser -__v"
+            },
+            select:
+                "-email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -photos -usertype -role -birthday -createdAt -about -livesIn -job -company -school -salt -hashed_password -__v"
+
+        })
+        .populate({
+            path: "user1", populate: {
+                path: "avatar_profile",
+                model: "Avatar",
+                select: "-refUser -__v"
+            },
+            select:
+                "-email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -photos -usertype -role -birthday -createdAt -about -livesIn -job -company -school -salt -hashed_password -__v"
+
+        })
+
+        // .populate("user1", "username lastname firstname avatar_profile")
+
         .exec((err, matches) => {
             if (err) {
                 return res.status(400).json(err)

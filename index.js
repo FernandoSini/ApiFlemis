@@ -55,12 +55,12 @@ let messages = []
 
 var clients = {}
 io.of("/match/chat").on("connection", (socket) => {
-    console.log("connetetd");
+    console.log("connected");
     console.log(socket.id, "has joined");
     socket.on("signIn", (id) => {
         console.log(id);
         clients[id] = socket;
-        console.log(clients);
+        // console.log(clients);
     });
     socket.on("sendMessage", (msg) => {
         console.log(msg);
@@ -93,12 +93,11 @@ app.use("/", rotasMatch)
 
 
 app.use((err, req, res, next) => {
-    console.log(err)
+
     if (err.status === 400) {
         return res.status(400).json({ error: "Bad Request!" })
     }
     if (err.status === 401) {
-        console.log(err)
         return res.status(401).json({ error: "Unauthorized!" })
     }
     if (err.status === 403) {

@@ -218,8 +218,6 @@ exports.uploadEventCover = async (req, res, next) => {
 exports.getEventsByEventStatus = async (req, res) => {
     console.log(req.query.eventstatus)
     await Event.find({ event_status: req.query.eventstatus })
-        // .populate("event_owner", "_id username firstname lastname avatar_profile")
-        // .populate("event_owner").select("-likesSent -likesReceived -events_going")
         .populate({
             path: "event_owner", populate: {
                 path: "avatar_profile",
@@ -236,7 +234,7 @@ exports.getEventsByEventStatus = async (req, res) => {
         .populate("event_photo", "_id path contentType filename")
         .exec((err, events) => {
             if (err) {
-                return res.status(400).json(err)
+                return res.status(400).json({ error: err })
             }
             if (!events.length) {
                 return res.status(404).json({ error: "Not found events with this status" })
@@ -285,3 +283,57 @@ exports.getEventsByEventStatus = async (req, res) => {
 //             }
 //         })
 // }
+
+exports.searchEventsByName = async (req, res) => {
+    console.log(req.query.eventname)
+    console.log(req.query.eventname.includes(" "))
+    await Event.find({ event_name: req.query.eventname })
+        .populate({
+            path: "event_owner", populate: {
+                path: "avatar_profile",
+                model: "Avatar",
+                select: "-refUser -__v"
+            },
+            select:
+                "-email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -photos -usertype -role -birthday -createdAt -about -livesIn -job -company -school -__v"
+
+        })
+        .populate("event_owner.avatar_profile", "_id path filename ")
+        // .populate("avatar_profile", "_id contentType path filename]")
+        .populate("users", "_id username firstname lastname")
+        .populate("event_photo", "_id path contentType filename")
+        .exec((err, events) => {
+            if (err) {
+                return res.status(400).json({ error: err })
+            }
+            if (!events.length) {
+                return res.status(404).json({ error: "Not found events with this name" })
+            }
+            if (!events.users == undefined || !events.users == null) {
+                events.users.forEach(element => {
+                    element.hashed_password = undefined;
+                    element.salt = undefined;
+                })
+            }
+            events.forEach(event => {
+                event.event_owner.hashed_password = undefined;
+                event.event_owner.salt = undefined;
+                let now = new Date()
+                if (now >= event.end_date || event.event_status == "ENDED") {
+                    console.log("caiu aqui")
+                    event.event_status = "ENDED"
+                    event.save()
+                } else if (now < event.start_date) {
+                    console.log("caí no 2")
+                    event.event_status = "INCOMING"
+                    event.save();
+                } else {
+                    event.event_status = "HAPPENING";
+                    event.save();
+                }
+            })
+
+            return res.status(200).json(events);
+
+        })
+}
