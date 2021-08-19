@@ -249,16 +249,6 @@ exports.likeUser = async (req, res) => {
 
     if (likeExists) {
 
-
-        // you.matches.push(match._id)
-        // you.save()
-        // targetUser.matches.push(match._id)
-        // targetUser.save()
-        // console.log(match)
-        // you.matches.push(match._id);
-        // targetUser.matches.push(match_id)
-        // return res.status(400).json({ error: "We have a match" })
-
         return res.status(400).json({ error: "User already liked!" })
 
     } else {

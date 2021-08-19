@@ -43,7 +43,7 @@ mongoose.connection.on("error", err => {
 //     return res.render("index.html");
 // })
 
-let messages = []
+// let messages = []
 // io.of("/fodase").on("connection", socket => {
 //     console.log("socket id" + socket.id);
 
@@ -56,17 +56,42 @@ let messages = []
 // })
 
 var clients = {}
+let messages = []
 io.of("/match/chat").on("connection", (socket) => {
     console.log("connected");
     console.log(socket.id, "has joined");
     socket.on("signIn", (id) => {
         console.log(id);
         clients[id] = socket;
-        console.log(clients);
+        // console.log(clients);
     });
+    socket.on("loadMessages", async (matchId) => {
+        // console.log("match" + matchId);
+        let data = []
+        messages = await Message.find({ match: matchId })
+        // .exec((err, msgs) => {
+        //     if (err) { }
+        //     msgs.forEach(element => {
+        //         element.message_status = "DELIVERED";
+        //         element.save();
+
+        //     });
+        //     // console.log(msgs)
+        //     return msgs;
+        // })
+        messages.forEach(element => {
+            element.message_status = "DELIVERED";
+            element.save();
+        })
+        console.log(messages)
+        socket.emit("carregarData", messages);
+
+
+    })
+
     socket.on("sendMessage", async (msg) => {
         console.log(msg);
-        console.log(JSON.stringify(msg))
+        // console.log(JSON.stringify(msg))
         let targetId = msg.targetId;
         let messageData = await new Message({ from: msg.yourId, content: msg.content, target: msg.targetId, match: msg.matchId, message_status: msg.message_status, timestamp: msg.timestamp }).save();
         console.log(messageData._id)
