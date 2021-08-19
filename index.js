@@ -15,6 +15,8 @@ const rotasAuth = require("./routes/auth")
 const rotasUser = require("./routes/user")
 const rotasEvents = require("./routes/event")
 const rotasMatch = require("./routes/match")
+const Message = require("./models/message")
+const Match = require("./models/match")
 // const cors = require("cors")
 //isso aqui foi adicionado junto a pasta public
 // app.use(express.static(path.join(__dirname, 'public')))
@@ -60,11 +62,15 @@ io.of("/match/chat").on("connection", (socket) => {
     socket.on("signIn", (id) => {
         console.log(id);
         clients[id] = socket;
-        // console.log(clients);
+        console.log(clients);
     });
-    socket.on("sendMessage", (msg) => {
+    socket.on("sendMessage", async (msg) => {
         console.log(msg);
+        console.log(JSON.stringify(msg))
         let targetId = msg.targetId;
+        let messageData = await new Message({ from: msg.yourId, content: msg.content, target: msg.targetId, match: msg.matchId, message_status: msg.message_status, timestamp: msg.timestamp }).save();
+        console.log(messageData._id)
+        await Match.findByIdAndUpdate(msg.matchId, { $push: { messages: messageData._id } }).exec((err, result) => console.log(result));
         if (clients[targetId]) clients[targetId].emit("sendMessage", msg);
     });
 });

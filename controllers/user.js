@@ -16,7 +16,7 @@ exports.userById = (req, res, next, id) => {
         .populate("avatar_profile", "path filename contentType")
         .exec((err, user) => {
             if (err) {
-                return res.satus(400).json({ error: "User not found" })
+                return res.status(400).json({ error: "User not found" })
             }
             //criando o objeto profile com as infos do usuario
             // user.hashed_password = undefined;
@@ -421,7 +421,7 @@ exports.getLikes = async (req, res) => {
 }
 
 exports.getLikesReceived = async (req, res) => {
-
+    console.log(req.profile._id)
     await User.find({ likesSent: req.profile._id })
         .populate("avatar_profile", "_id path contentType filename")
         .select("-likesSent -likesReceived -gender -matches -eventsGoing -eventsCreated -email -createdAt -__v -photos")

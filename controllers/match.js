@@ -28,19 +28,18 @@ exports.getMatchesByUserId = (req, res) => {
                 "-email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -photos -usertype -role -birthday -createdAt -about -livesIn -job -company -school -salt -hashed_password -__v"
 
         })
-
+        .populate("messages", "from content target message_status timestamp")
         // .populate("user1", "username lastname firstname avatar_profile")
-
         .exec((err, matches) => {
             if (err) {
                 return res.status(400).json(err)
-            } else {
-                console.log(matches)
-                // matches.forEach(element=> {
-                //     console.log(element)
-                // })
-                return res.status(200).json(matches)
             }
+            if (!matches.length) {
+                return res.status(404).json({ error: "Not found matches with you" })
+            }
+
+            return res.status(200).json(matches)
+
 
         })
 

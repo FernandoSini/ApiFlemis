@@ -18,6 +18,18 @@ const messageSchema = new mongoose.Schema({
     target: {
         type: ObjectId,
         ref: "User"
+    },
+    match: {
+        type: ObjectId,
+        ref: "Match"
+    },
+    timestamp: {
+        type: Date,
+        default: Date.now,
+    },
+    message_status: {
+        type: String,
+        enum: ["RECEIVED", "DELIVERED"],
     }
 
 });
