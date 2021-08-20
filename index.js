@@ -96,22 +96,12 @@ io.of("/match/chat").on("connection", (socket) => {
         messages = await Message.find({ match: matchId })
             .populate("messages", "from content target message_status timestamp")
 
-        // .exec((err, msgs) => {
-        //     if (err) { }
-        //     msgs.forEach(element => {
-        //         element.message_status = "DELIVERED";
-        //         element.save();
-
-        //     });
-        //     // console.log(msgs)
-        //     return msgs;
-        // })
         messages.forEach(element => {
             element.message_status = "DELIVERED";
             element.save();
         })
         console.log(messages)
-        
+
         socket.emit("carregarMensagens", messages);
 
     })

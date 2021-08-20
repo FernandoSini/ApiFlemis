@@ -234,9 +234,6 @@ exports.likeUser = async (req, res) => {
 
                     result.hashed_password = undefined;
                     result.salt = undefined;
-                    // if(likeExists && targetLikeYouExists){
-                    //     var match= new Match({user1:targetUser._id, user2:you._id }).save();
-                    //     }
                     if (targetLikeYouExists) {
                         let match = new Match({ user1: targetUser._id, user2: you._id });
                         match.save((err, result) => {
@@ -259,8 +256,6 @@ exports.likeUser = async (req, res) => {
             })
         you.likesSent.push(targetUser._id);
         you.save();
-
-
     }
 
 
