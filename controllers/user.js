@@ -79,11 +79,6 @@ exports.avatarUpload = multer({
 exports.uploadAvatar = async (req, res, next) => {
     // console.log(req.profile)
     try {
-        // return res.json({ path: req.file })
-        // console.log(req.profile)
-        // let user = req.profile;
-        // user = _.extend(user, req.file.path)
-
 
         if (!req.file.mimetype === "image/gif"
             || !req.file.mimetype === "image/png"
@@ -91,35 +86,6 @@ exports.uploadAvatar = async (req, res, next) => {
             || !req.file.mimetype === "image/jpg") {
             return res.status(400).json({ error: "Needs to be image or gif" })
         }
-        // // console.log(req.file)
-        // req.profile.avatar_profile.filename = req.file.filename;
-        // req.profile.avatar_profile.contentType = req.file.mimetype;
-        // req.profile.avatar_profile.path = req.file.path;
-        // console.log(req.profile)
-        // console.log("aqui2")
-
-        // avatar.save((err,result)=>{
-        //     if(err){
-        //         res.json(err)
-        //     }
-        //     return res.status(200).json(result);
-        // });
-
-        // Avatar.findOneAndReplace({ refUser: req.profile._id })
-        //     .exec((err, result) => {
-        //         if (err || !result) {
-        //             console.log(err)
-        //             console.log(result);
-        //             avatar.save((erro, resultado) => {
-        //                 if (erro) {
-        //                     return res.json(erro)
-        //                 }
-        //                 console.log("resultado:" +resultado)
-        //                 return res.status(200).json(resultado)
-        //             })
-        //         }
-        //         console.log("result" +result)
-        //     })
 
 
 

@@ -17,6 +17,7 @@ router.get("/api/users/gender/find/different?:gender", requireLogin, getUserByDi
 router.get("/api/users/photos/:userId")
 router.get("/api/users/likes/received/:userId", getLikesReceived)
 router.put("/api/users/:userId/upload/avatar", requireLogin, hasAuthorization, avatarUpload.single("img"), uploadAvatar)
+router.put("/api/users/avatar/update/:userId", requireLogin, hasAuthorization, avatarUpload.single("img"), uploadAvatar)
 router.get("/api/users/:userId/avatar", requireLogin, getAvatar)
 router.get("/api/users/likedBy/you", getLikes)
 router.post("/api/users/:userId/photo/upload")
