@@ -24,14 +24,14 @@ exports.getEventById = (req, res, next, id) => {
             if (now >= req.event.end_date) {
                 console.log("caiu aqui")
                 req.event.event_status = "ENDED"
-                
+
             } else if (now < event.start_date) {
                 console.log("caí no 2")
                 req.event.event_status = "INCOMING"
-               
+
             } else {
                 req.event.event_status = "HAPPENING";
-                
+
             }
             next()
         })
@@ -141,7 +141,7 @@ exports.updateEvent = async (req, res) => {
     let form = new formidable.IncomingForm({ uploadDir: "./uploads/events/photo" })
     form.keepExtensions = true;
     // form.uploadDir = path.join(__dirname, "./../uploads/events/photo")
-    form.parse(req, (err, fields, files) => {
+    form.parse(req, async (err, fields, files) => {
 
 
         if (err) {
@@ -160,28 +160,33 @@ exports.updateEvent = async (req, res) => {
             }
 
 
-            let eventCoverExists = EventPhoto.exists({ refEvent: req.event._id })
+            let eventCoverExists = await EventPhoto.exists({ refEvent: req.event._id })
+            console.log(eventCoverExists)
             if (!eventCoverExists) {
                 console.log("arere")
                 let eventphoto = new EventPhoto({
-                    refEvent: event._id,
-
+                    refEvent: req.event._id,
                     contentType: files.img.type,
                     path: files.img.path,
                     filename: files.img.name
                 });
                 eventphoto.save();
-                event.event_cover = eventphoto._id
+                req.event.event_cover = eventphoto._id
             } else {
-                EventPhoto.findOneAndUpdate({ refEvent: req.event._id },
+                console.log("arere2")
+                console.log(req.event)
+                let eventPhoto = await EventPhoto.findOneAndUpdate({ refEvent: req.event._id },
                     { filename: files.img.name, path: files.img.path, contentType: files.img.type },
                     { $new: true })
                     .exec((err, result) => {
                         if (err) {
                             return res.status(400).json({ err })
                         }
+                        req.event.event_cover = result._id;
                         // return res.status(200).json(result);
-                    })
+                    });
+
+
             }
 
         }
