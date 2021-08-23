@@ -2,6 +2,10 @@ const User = require("../models/user")
 const Event = require("../models/event");
 const EventPhoto = require("../models/eventPhotos")
 const multer = require("multer")
+const uuid = require("uuidv1")
+const path = require("path")
+const formidable = require("formidable")
+const _ = require("lodash");
 
 exports.getEventById = (req, res, next, id) => {
     Event.findById(id)
@@ -20,14 +24,14 @@ exports.getEventById = (req, res, next, id) => {
             if (now >= req.event.end_date) {
                 console.log("caiu aqui")
                 req.event.event_status = "ENDED"
-                event.save()
+                
             } else if (now < event.start_date) {
                 console.log("caí no 2")
                 req.event.event_status = "INCOMING"
-                req.event.save();
+               
             } else {
                 req.event.event_status = "HAPPENING";
-                req.event.save();
+                
             }
             next()
         })
@@ -62,7 +66,7 @@ exports.getSingleEvent = async (req, res) => {
                     event.save();
                 }
 
-                // console.log(events)
+
                 return res.status(200).json(event);
             }
         })
@@ -100,7 +104,7 @@ exports.getEvents = async (req, res) => {
                         event.save();
                     }
                 })
-                // console.log(events)
+
                 return res.status(200).json(events);
             }
         })
@@ -119,21 +123,85 @@ exports.isEventOwner = (req, res, next) => {
 }
 
 
-exports.updateEvent = (req, res) => {
+exports.updateEvent = async (req, res) => {
+    // Event.findByIdAndUpdate(req.body.eventId,
+    //     {
+    //         $set: req.body
+    //     }
+    // ).exec((err, updatedEvent) => {
+    //     if (err) {
+    //         return res.status(400).json(err)
+    //     } else {
 
-    Event.findByIdAndUpdate(req.body.eventId,
-        {
-            $set: req.body
-        }
-    ).exec((err, updatedEvent) => {
+    //         return res.status(200).json(updatedEvent);
+    //     }
+
+    // })
+
+    let form = new formidable.IncomingForm({ uploadDir: "./uploads/events/photo" })
+    form.keepExtensions = true;
+    // form.uploadDir = path.join(__dirname, "./../uploads/events/photo")
+    form.parse(req, (err, fields, files) => {
+
+
         if (err) {
-            return res.status(400).json(err)
-        } else {
-
-            return res.status(200).json(updatedEvent);
+            console.log(err)
+            return res.status(400).json({ error: err })
         }
 
+
+        if (files.img) {
+            if (!files.img.type === "image/gif"
+                || !files.img.type === "image.png"
+                || !files.img.type === "image/jpeg"
+                || !files.img.type === "image/jpg"
+                || !files.img.type === "image/png") {
+                return res.status(400).json({ error: "Avatar nedds to be a gif, png, jpeg,jpg, or PNG" })
+            }
+
+
+            let eventCoverExists = EventPhoto.exists({ refEvent: req.event._id })
+            if (!eventCoverExists) {
+                console.log("arere")
+                let eventphoto = new EventPhoto({
+                    refEvent: event._id,
+
+                    contentType: files.img.type,
+                    path: files.img.path,
+                    filename: files.img.name
+                });
+                eventphoto.save();
+                event.event_cover = eventphoto._id
+            } else {
+                EventPhoto.findOneAndUpdate({ refEvent: req.event._id },
+                    { filename: files.img.name, path: files.img.path, contentType: files.img.type },
+                    { $new: true })
+                    .exec((err, result) => {
+                        if (err) {
+                            return res.status(400).json({ err })
+                        }
+                        // return res.status(200).json(result);
+                    })
+            }
+
+        }
+
+
+        let event = req.event;
+        event = _.extend(event, fields)
+
+        event.save((err, result) => {
+            if (err) {
+                console.log(err)
+                return res.status(400).json({ error: err })
+            }
+
+
+            return res.status(200).json(event)
+        })
     })
+
+
 }
 
 const eventStorage = multer.diskStorage({
@@ -150,9 +218,7 @@ exports.eventPhotoUpload = multer({
     storage: eventStorage,
 
     fileFilter: (req, file, cb) => {
-        console.log("caindo aqui")
-        // console.log(req.profile._id)
-        // console.log(file)
+
         if (!file.mimetype === "image/gif"
             || !file.mimetype === "image/png"
             || !file.mimetype === "image/jpeg"
@@ -162,10 +228,10 @@ exports.eventPhotoUpload = multer({
         } else {
             cb(null, true)
         }
-        // User.findOneAndUpdate(req.profile._id,
-        //     { $push: { avatar_profile: file.filename } })
+
     }
 })
+
 //está funcionando
 exports.uploadEventCover = async (req, res, next) => {
     try {
@@ -187,7 +253,6 @@ exports.uploadEventCover = async (req, res, next) => {
                 path: req.file.path,
                 filename: req.file.filename
             });
-            console.log("fala ai galera")
             createEvent.save((error, result) => {
                 if (error) {
                     return res.status(400).json(error);
@@ -209,14 +274,12 @@ exports.uploadEventCover = async (req, res, next) => {
         }
 
     } catch (e) {
-        console.log("aqui")
         return res.status(400).json({ error: "Error while upload image: " + e.toString() })
     }
 
 
 }
 exports.getEventsByEventStatus = async (req, res) => {
-    console.log(req.query.eventstatus)
     await Event.find({ event_status: req.query.eventstatus })
         .populate({
             path: "event_owner", populate: {
@@ -229,9 +292,8 @@ exports.getEventsByEventStatus = async (req, res) => {
 
         })
         .populate("event_owner.avatar_profile", "_id path filename ")
-        // .populate("avatar_profile", "_id contentType path filename]")
         .populate("users", "_id username firstname lastname")
-        .populate("event_photo", "_id path contentType filename")
+        .populate("event_cover", "_id path contentType filename")
         .exec((err, events) => {
             if (err) {
                 return res.status(400).json({ error: err })
@@ -250,11 +312,9 @@ exports.getEventsByEventStatus = async (req, res) => {
                 event.event_owner.salt = undefined;
                 let now = new Date()
                 if (now >= event.end_date || event.event_status == "ENDED") {
-                    console.log("caiu aqui")
                     event.event_status = "ENDED"
                     event.save()
                 } else if (now < event.start_date) {
-                    console.log("caí no 2")
                     event.event_status = "INCOMING"
                     event.save();
                 } else {
@@ -267,22 +327,7 @@ exports.getEventsByEventStatus = async (req, res) => {
 
         })
 }
-// exports.getEventStatus = (req, res, next, eventStatus) => {
 
-//     Event.find({ eventStatus: eventStatus })
-//         .populate("event_owner", "username firstname lastname")
-//         .populate("event_owner.avatar_profile", "_id contentType path filename")
-//         .populate("users", "username firstname lastname")
-//         .populate("event_photo", "path contentType filename")
-//         .exec((err,events)=>{
-//             if(err){
-//                 return res.status(400).json(err)
-//             }else{
-
-//                 return res.status(200).json(events);
-//             }
-//         })
-// }
 
 exports.searchEventsByName = async (req, res) => {
     console.log(req.query.eventname)
@@ -299,7 +344,6 @@ exports.searchEventsByName = async (req, res) => {
 
         })
         .populate("event_owner.avatar_profile", "_id path filename ")
-        // .populate("avatar_profile", "_id contentType path filename]")
         .populate("users", "_id username firstname lastname")
         .populate("event_photo", "_id path contentType filename")
         .exec((err, events) => {
@@ -320,11 +364,9 @@ exports.searchEventsByName = async (req, res) => {
                 event.event_owner.salt = undefined;
                 let now = new Date()
                 if (now >= event.end_date || event.event_status == "ENDED") {
-                    console.log("caiu aqui")
                     event.event_status = "ENDED"
                     event.save()
                 } else if (now < event.start_date) {
-                    console.log("caí no 2")
                     event.event_status = "INCOMING"
                     event.save();
                 } else {
@@ -335,5 +377,46 @@ exports.searchEventsByName = async (req, res) => {
 
             return res.status(200).json(events);
 
+        })
+}
+exports.getGoingEvents = async (req, res) => {
+    await Event.find({ users: { $in: [req.query.userId] } })
+        .populate("users", "_id username firstname lastname avatar_profile")
+        .populate("avatar_profile", "_id path contentType filename")
+        .exec((err, events) => {
+            if (err) {
+                return res.status(400).json({ error: err })
+            }
+            if (!events.length) {
+                return res.status(404).json({ error: "Not found events you're going" })
+            }
+
+            return res.status(200).json(events);
+        })
+}
+exports.getYourEvents = async (req, res) => {
+    await Event.find({ event_owner: req.query.yourId })
+        .populate({
+            path: "event_owner", populate: {
+                path: "avatar_profile",
+                model: "Avatar",
+                select: "-refUser -__v"
+            },
+            select:
+                "-email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -photos -usertype -role -birthday -createdAt -about -livesIn -job -company -school -__v"
+
+        })
+        .populate("event_cover", "_id path contentType filename")
+        .populate("users", "_id username firstname lastname avatar_profile")
+        .populate("avatar_profile", "_id path contentType filename")
+        .exec((err, events) => {
+            if (err) {
+                return res.status(400).json({ error: err })
+            }
+            if (!events.length) {
+                return res.status(404).json({ error: "Not found events you're going" })
+            }
+
+            return res.status(200).json(events);
         })
 }
