@@ -133,6 +133,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser());
 app.use("/api/uploads/user/avatar", express.static('./uploads/user/avatar'))
 app.use("/api/uploads/events/photo", express.static('./uploads/events/photo'))
+app.use("/api/uploads/user/photos", express.static('./uploads/user/photos'))
 
 app.use("/", rotasAuth)
 app.use("/", rotasUser)

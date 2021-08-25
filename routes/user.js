@@ -5,7 +5,7 @@ const { userById, updateUser, targetUserById,
     likeUser, getUserProfile, deleteUser,
     getUserByDifferentGender, hasAuthorization,
     getAllUsers,
-    getLikes, getLikesReceived } = require("../controllers/user")
+    getLikes, getLikesReceived, uploadPhotos } = require("../controllers/user")
 const { requireLogin } = require("../controllers/auth");
 
 
@@ -19,11 +19,11 @@ router.get("/api/users/likes/received/:userId", requireLogin, hasAuthorization, 
 router.put("/api/users/:userId/upload/avatar", requireLogin, hasAuthorization, avatarUpload.single("img"), uploadAvatar)
 router.put("/api/users/avatar/update/:userId", requireLogin, hasAuthorization, avatarUpload.single("img"), uploadAvatar)
 router.get("/api/users/:userId/avatar", requireLogin, getAvatar)
-router.get("/api/users/likedBy/you", getLikes)
-router.post("/api/users/:userId/photo/upload")
+router.get("/api/users/likedBy/you", requireLogin, getLikes)
+router.post("/api/users/:userId/photo/upload", requireLogin, hasAuthorization, uploadPhotos)
 router.delete("/api/users/delete/:userId", requireLogin, hasAuthorization, deleteUser)
 // router.put("/api/users/update/:userId", updateUser)
-router.put("/api/users/:userId/like/:targetUserId", requireLogin, likeUser)
+router.put("/api/users/:userId/like/:targetUserId", requireLogin, hasAuthorization, likeUser)
 
 router.param("userId", userById)
 router.param("targetUserId", targetUserById)

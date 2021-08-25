@@ -25,6 +25,7 @@ exports.login = (req, res) => {
     const { username, password } = req.body;
     User.findOne({ username: username })
         .populate("avatar_profile", "_id contentType path filename")
+        .populate("photos", "_id contentType path filename")
         .populate("likesSent", "_id username firstname lastname avatar_profile birthday")
         .populate("likesReceived", "_id username firstname lastname avatar_profile birthday")
         .exec((err, user) => {

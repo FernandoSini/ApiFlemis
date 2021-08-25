@@ -7,13 +7,15 @@ const _ = require("lodash")
 const path = require("path")
 const Avatar = require("../models/avatar")
 const Match = require("../models/match")
-
+const UserPhoto = require("../models/userPhotos");
+const user = require("../models/user")
 
 exports.userById = (req, res, next, id) => {
     User.findById(id)
         .populate("likesSent", "_id username avatar_profile")
         .populate("likesReceived", "_id username avatar_profile")
         .populate("avatar_profile", "path filename contentType")
+        .populate("photos", "path filename contentType")
         .exec((err, user) => {
             if (err) {
                 return res.status(400).json({ error: "User not found" })
@@ -190,14 +192,18 @@ exports.getAvatar = (req, res, next) => {
     next()
 }
 
-exports.updateUser = (req, res) => {
-    User.findByIdAndUpdate(req.body.yourId, {
+exports.updateUser = async (req, res) => {
+    console.log(req.profile._id)
+    await User.findByIdAndUpdate({ _id: req.profile._id }, {
         $set: req.body
-    }).exec((err, data) => {
+    }, { new: true }).populate("avatar_profile", "id_ path filename contentType").exec((err, data) => {
         if (err || !data) {
+            console.log(err);
             return res.status(400).json({ err: "Can't updateData" })
         } else {
-            return res.status(200).json("User updated successfully")
+            console.log(data)
+            return res.status(200).json(data);
+            // return res.status(200).json("User updated successfully")
         }
     })
 }
@@ -288,10 +294,7 @@ exports.hasAuthorization = (req, res, next) => {
     let adminUser = req.profile && req.auth && req.auth.role === "admin";
 
     const isAuthorized = sameUser || adminUser;
-    console.log("SameUser", sameUser)
-    console.log("adminUser", adminUser)
-    console.log(req.profile)
-    console.log(req.auth);
+
     if (!isAuthorized) {
         return res.status(403).json({ error: "User not authorized" })
     }
@@ -318,6 +321,7 @@ exports.getUserByDifferentGender = (req, res) => {
         .populate("likesSent", "_id firstname lastname username birthday")
         .populate("likesReceived", "_id firstname lastname username birthday")
         .populate("avatar_profile", "_id path contentType filename")
+        .populate("photos", "_id path contentType filename")
         .exec((err, users) => {
             if (err || !users) {
                 if (!users || !users.length) {
@@ -389,6 +393,47 @@ exports.getLikesReceived = async (req, res) => {
             })
             return res.status(200).json(usersLiked)
         })
+}
+
+exports.uploadPhotos = async (req, res) => {
+    let form = new formidable.IncomingForm({ uploadDir: "./uploads/user/photos" })
+    form.keepExtensions = true;
+    // form.uploadDir = path.join(__dirname, "./../uploads/events/photo")
+    form.parse(req, async (err, fields, files) => {
+
+
+        if (err) {
+            console.log(err)
+            return res.status(400).json({ error: err })
+        }
+
+
+        if (files.img) {
+            if (!files.img.type === "image/gif"
+                || !files.img.type === "image.png"
+                || !files.img.type === "image/jpeg"
+                || !files.img.type === "image/jpg"
+                || !files.img.type === "image/png") {
+                return res.status(400).json({ error: "Avatar nedds to be a gif, png, jpeg,jpg, or PNG" })
+            }
+
+            let userPhoto = new UserPhoto({
+                refUser: req.profile._id,
+                contentType: files.img.type,
+                path: files.img.path,
+                filename: files.img.name
+            });
+            userPhoto.save((err, result) => {
+                let user = req.profile;
+                user.photos.push(result._id)
+                user.save();
+
+                return res.status(200).json(result);
+            });
+
+        }
+
+    })
 }
 
 
