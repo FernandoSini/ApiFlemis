@@ -82,7 +82,7 @@ mongoose.connection.on("error", err => {
 // });
 
 //socket funcionando
-io.of("/match/chat").on("connection", (socket) => {
+io.of("/api/match/chat").on("connection", (socket) => {
     console.log("connected");
     console.log(socket.id, "has joined");
     socket.on("signIn", (id) => {
@@ -100,7 +100,7 @@ io.of("/match/chat").on("connection", (socket) => {
             element.message_status = "DELIVERED";
             element.save();
         })
-        console.log(messages)
+        // console.log(messages)
 
         socket.emit("carregarMensagens", messages);
 

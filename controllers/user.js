@@ -124,9 +124,12 @@ exports.uploadAvatar = async (req, res, next) => {
                     if (err) {
                         return res.status(400).json({ err })
                     }
-                    user.avatar_profile = result._id;
+                    user.avatar_profile._id = result._id;
+                    user.avatar_profile.path = result.path;
+                    user.avatar_profile.contentType = result.contentType;
+                    user.avatar_profile.filename = result.filename;
                     user.save();
-                    return res.status(200).json(result);
+                    return res.status(200).json(user);
 
                 })
         }
@@ -196,16 +199,19 @@ exports.updateUser = async (req, res) => {
     console.log(req.profile._id)
     await User.findByIdAndUpdate({ _id: req.profile._id }, {
         $set: req.body
-    }, { new: true }).populate("avatar_profile", "id_ path filename contentType").exec((err, data) => {
-        if (err || !data) {
-            console.log(err);
-            return res.status(400).json({ err: "Can't updateData" })
-        } else {
-            console.log(data)
-            return res.status(200).json(data);
-            // return res.status(200).json("User updated successfully")
-        }
-    })
+    }, { new: true })
+        .populate("avatar_profile", "_id path filename contentType")
+        .populate("photos", "_id path filename contentType")
+        .exec((err, data) => {
+            if (err || !data) {
+                console.log(err);
+                return res.status(400).json({ err: "Can't updateData" })
+            } else {
+                console.log(data)
+                return res.status(200).json(data);
+                // return res.status(200).json("User updated successfully")
+            }
+        })
 }
 exports.likeUser = async (req, res) => {
     // console.log("profile: " + req.profile);
