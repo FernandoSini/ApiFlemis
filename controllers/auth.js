@@ -39,7 +39,7 @@ exports.login = (req, res) => {
             }
 
             const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" })
-            res.cookie("token", token, { expiresIn: '1h' });
+            res.cookie("token", token, { expiresIn: /* '1h' */ new Date() + 9999 });
 
             const { _id, username, firstname, lastname, birthday, gender, roleUser, email, avatar_profile, about, usertype, job, livesin, school, company, photos, likesSent, likesReceived, matches, role, createdAt } = user;
             return res.status(200).json({ _id, username, firstname, lastname, birthday, gender, roleUser, email, avatar_profile, about, usertype, job, livesin, school, company, photos, likesSent, likesReceived, matches, role, createdAt, token })
@@ -58,3 +58,45 @@ exports.logout = (req, res) => {
     return res.json({ message: "Logout successfully" })
 }
 
+exports.verifyUserExists = async (req, res, next) => {
+    console.log(req.body.data);
+    let userExists = await User.exists({ $or: [{ email: req.body.data }, { username: req.body.data }] });
+    console.log(userExists);
+    if (!userExists) {
+        return res.status(404).json({ error: "Not found user with this data" })
+    } else {
+        return res.status(200).json(userExists);
+
+    }
+
+}
+
+
+exports.resetPassword = async (req, res) => {
+
+    await User.findOne({ $or: [{ email: req.body.data }, { username: req.body.data }] }, (err, user) => {
+        if (err) {
+
+            return res.status(400).json({ error: err })
+        }
+        if (!user) {
+            return res.status(404).json({ error: "Not found user with this email or username" });
+        }
+        const updateFields = {
+            password: req.body.newPassword,
+            resetPasswordLink: ""
+        }
+        user = _.extend(user, updateFields)
+
+        user.save((err, result) => {
+            if (err) {
+                console.log("aqui2")
+                return res.status(400).json({ error: err });
+            }
+
+            return res.status(200).json("Password updated")
+        })
+    })
+
+
+}

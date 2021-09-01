@@ -62,3 +62,28 @@ exports.userRegisterValidator = (req, res, next) => {
     next();
 
 }
+exports.passwordResetValidator = (req, res, next) => {
+    // check for password
+    req.check("newPassword", "new Password is required")
+    req.check("newPassword")
+        .isLength({ min: 6 })
+        .withMessage("Password must contain at least 6 characters")
+        .matches(/(?=.*[A-Z])/)
+        .withMessage("Password must contain 1 uppercase letter")
+        .matches(/(?=.*[a-z])/)
+        .withMessage("Password must contain 1 lowercase letter")
+        .matches(/\d/) //senha com pelo menos um numero
+        .withMessage("Password must contain a number")
+        .matches(/(?=.*[}{,.^?~=+\-_\/*\-+.\| !@#%¨$&()""''ºª`´;:><])/)
+        .withMessage("Password must contain a special character")
+ 
+    // check for errors
+    const errors = req.validationErrors();
+    // if error show the first one as they happen
+    if (errors) {
+        const firstError = errors.map(error => error.msg)[0];
+        return res.status(400).json({ error: firstError });
+    }
+    // proceed to next middleware or ...
+    next();
+};

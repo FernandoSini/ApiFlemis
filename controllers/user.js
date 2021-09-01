@@ -115,13 +115,13 @@ exports.uploadAvatar = async (req, res, next) => {
         } else {
             let user = req.profile;
             console.log("foda-se")
-            console.log(req.profile)
+            // console.log(req.profile)
 
             await Avatar.findOneAndUpdate({ refUser: user._id },
                 { filename: req.file.filename, path: req.file.path, contentType: req.file.mimetype },
-                { $new: true })
+                { new: true })
                 .exec((err, result) => {
-                    if (err) {
+                    if (err || !result) {
                         return res.status(400).json({ err })
                     }
                     user.avatar_profile._id = result._id;
@@ -129,7 +129,8 @@ exports.uploadAvatar = async (req, res, next) => {
                     user.avatar_profile.contentType = result.contentType;
                     user.avatar_profile.filename = result.filename;
                     user.save();
-                    return res.status(200).json(user);
+                    console.log(result);
+                    return res.status(200).json(result);
 
                 })
         }
@@ -141,6 +142,77 @@ exports.uploadAvatar = async (req, res, next) => {
 
 
 }
+// exports.updateAvatar = async (req, res, next) => {
+//     // console.log(req.profile)
+
+//     let form = new formidable.IncomingForm({ uploadDir: "./uploads/user/avatar" })
+//     form.keepExtensions = true;
+//     form.parse(req, async (err, fields, file) => {
+
+//         if (err) {
+//             console.log(err)
+//             return res.status(400).json({ error: err })
+//         }
+
+//         if (file.img) {
+//             if (!file.img.type === "image/gif"
+//                 || !file.img.type === "image/png"
+//                 || !file.img.type === "image/jpeg"
+//                 || !file.img.type === "image/jpg") {
+//                 return res.status(400).json({ error: "Needs to be image or gif" })
+//             }
+
+
+
+//             let existAvatar = await Avatar.exists({ refUser: req.profile._id });
+//             if (!existAvatar) {
+//                 let userData = req.profile
+//                 let avatarCreate = new Avatar({
+//                     refUser: req.profile._id,
+//                     contentType: file.img.type,
+//                     path: file.img.path,
+//                     filename: file.img.name
+//                 });
+//                 console.log("fala ai galera")
+//                 await avatarCreate.save((error, result) => {
+//                     if (error) {
+//                         return res.status(400).json(error);
+//                     }
+//                     userData.avatar_profile = result._id;
+//                     userData.save()
+
+//                     return res.json(result)
+
+//                 })
+
+//             } else {
+//                 let user = req.profile;
+//                 console.log("foda-se")
+//                 // console.log(req.profile)
+
+//                 await Avatar.findOneAndUpdate({ refUser: user._id },
+//                     { filename: file.img.name, path: file.img.path, contentType: file.img.type },
+//                     { new: true })
+//                     .exec((err, result) => {
+//                         if (err) {
+//                             return res.status(400).json({ err })
+//                         }
+//                         user.avatar_profile._id = result._id;
+//                         user.avatar_profile.path = result.path;
+//                         user.avatar_profile.contentType = result.contentType;
+//                         user.avatar_profile.filename = result.filename;
+//                         user.save();
+
+//                         return res.status(200).json(result);
+
+//                     })
+//             }
+//         }
+//     })
+
+
+
+// }
 
 // exports.updateUser = (req, res, next) => {
 //     let form = new formidable.IncomingForm(/* { uploadDir: __dirname + "./../uploads/user/avatar" } */)
@@ -440,6 +512,17 @@ exports.uploadPhotos = async (req, res) => {
         }
 
     })
+
+}
+exports.deleteAvatar = async (req, res) => {
+    let avatar_profile = req.profile.avatar_profile;
+    avatar_profile.remove((err, avatar_profile) => {
+        if (err) {
+            return res.status(400).json({ error: "Can't remove avatar" });
+        }
+        return res.status(200).json("removed");
+    })
+
 }
 
 

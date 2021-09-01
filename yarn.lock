@@ -601,7 +601,7 @@ express-unless@^0.3.0:
   resolved "https://registry.yarnpkg.com/express-unless/-/express-unless-0.3.1.tgz#2557c146e75beb903e2d247f9b5ba01452696e20"
   integrity sha1-JVfBRudb65A+LSR/m1ugFFJpbiA=
 
-express-validator@5.3.1:
+express-validator@^5.3.1:
   version "5.3.1"
   resolved "https://registry.yarnpkg.com/express-validator/-/express-validator-5.3.1.tgz#6f42c6d52554441b0360c40ccfb555b1770affe2"
   integrity sha512-g8xkipBF6VxHbO1+ksC7nxUU7+pWif0+OZXjZTybKJ/V0aTVhuCoHbyhIPgSYVldwQLocGExPtB2pE0DqK4jsw==
