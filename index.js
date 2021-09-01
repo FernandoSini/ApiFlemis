@@ -17,7 +17,9 @@ const rotasEvents = require("./routes/event")
 const rotasMatch = require("./routes/match")
 const Message = require("./models/message")
 const Match = require("./models/match")
-// const cors = require("cors")
+const cors = require("cors")
+dotenv.config()
+
 //isso aqui foi adicionado junto a pasta public
 // app.use(express.static(path.join(__dirname, 'public')))
 app.set('views', path.join(__dirname, 'public'))
@@ -117,7 +119,7 @@ io.of("/api/match/chat").on("connection", (socket) => {
     });
 });
 
-
+app.use(cors())
 app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
