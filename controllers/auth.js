@@ -59,9 +59,9 @@ exports.logout = (req, res) => {
 }
 
 exports.verifyUserExists = async (req, res, next) => {
-    console.log(req.body.data);
+    
     let userExists = await User.exists({ $or: [{ email: req.body.data }, { username: req.body.data }] });
-    console.log(userExists);
+  
     if (!userExists) {
         return res.status(404).json({ error: "Not found user with this data" })
     } else {
@@ -90,7 +90,7 @@ exports.resetPassword = async (req, res) => {
 
         user.save((err, result) => {
             if (err) {
-                console.log("aqui2")
+             
                 return res.status(400).json({ error: err });
             }
 

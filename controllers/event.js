@@ -22,11 +22,11 @@ exports.getEventById = (req, res, next, id) => {
             req.event = event;
             let now = new Date()
             if (now >= req.event.end_date) {
-                console.log("caiu aqui")
+
                 req.event.event_status = "ENDED"
 
             } else if (now < event.start_date) {
-                console.log("caí no 2")
+
                 req.event.event_status = "INCOMING"
 
             } else {
@@ -38,9 +38,15 @@ exports.getEventById = (req, res, next, id) => {
 }
 
 exports.createEvent = async (req, res) => {
-    console.log(req.body)
+
     let event = await new Event(req.body);
     event.save();
+    User.findByIdAndUpdate(req.body.event_owner, { $push: { eventsCreated: event._id } }).exec((err, result) => {
+        if (err || !result) {
+            return res.status(400).json({ error: err })
+        }
+
+    });
     return res.status(200).json("Event created successfully")
 
 }
@@ -54,11 +60,11 @@ exports.getSingleEvent = async (req, res) => {
 
                 let now = new Date()
                 if (now >= event.end_date || event.event_status == "ENDED") {
-                    console.log("caiu aqui")
+
                     event.event_status = "ENDED"
                     event.save()
                 } else if (now < event.start_date) {
-                    console.log("caí no 2")
+
                     event.event_status = "INCOMING"
                     event.save();
                 } else {
@@ -89,14 +95,14 @@ exports.getEvents = async (req, res) => {
                 eventList.forEach(event => {
                     event.event_owner.hashed_password = undefined;
                     event.event_owner.salt = undefined;
-                    console.log(event.end_date)
+                   
                     let now = new Date()
                     if (now >= event.end_date || event.event_status == "ENDED") {
-                        console.log("caiu aqui")
+                     
                         event.event_status = "ENDED"
                         event.save()
                     } else if (now < event.start_date) {
-                        console.log("caí no 2")
+                       
                         event.event_status = "INCOMING"
                         event.save();
                     } else {
@@ -145,7 +151,7 @@ exports.updateEvent = async (req, res) => {
 
 
         if (err) {
-            console.log(err)
+            
             return res.status(400).json({ error: err })
         }
 
@@ -161,9 +167,9 @@ exports.updateEvent = async (req, res) => {
 
 
             let eventCoverExists = await EventPhoto.exists({ refEvent: req.event._id })
-            console.log(eventCoverExists)
+           
             if (!eventCoverExists) {
-                console.log("arere")
+              
                 let eventphoto = new EventPhoto({
                     refEvent: req.event._id,
                     contentType: files.img.type,
@@ -173,8 +179,7 @@ exports.updateEvent = async (req, res) => {
                 eventphoto.save();
                 req.event.event_cover = eventphoto._id
             } else {
-                console.log("arere2")
-                console.log(req.event)
+                
                 let eventPhoto = await EventPhoto.findOneAndUpdate({ refEvent: req.event._id },
                     { filename: files.img.name, path: files.img.path, contentType: files.img.type },
                     { $new: true })
@@ -197,7 +202,7 @@ exports.updateEvent = async (req, res) => {
 
         event.save((err, result) => {
             if (err) {
-                console.log(err)
+            
                 return res.status(400).json({ error: err })
             }
 
@@ -297,7 +302,17 @@ exports.getEventsByEventStatus = async (req, res) => {
 
         })
         .populate("event_owner.avatar_profile", "_id path filename ")
-        .populate("users", "_id username firstname lastname")
+        // .populate("users", "_id username firstname lastname avatar_profile")
+        .populate({
+            path: "users", populate: [{
+                path: "avatar_profile",
+                model: "Avatar",
+                select: "-refUser -__v"
+            }, { path: "photos", model: "UserPhoto", select: "-refUser -__v" }],
+            select:
+                "-email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -usertype -role  -createdAt  -__v"
+
+        })
         .populate("event_cover", "_id path contentType filename")
         .exec((err, events) => {
             if (err) {
@@ -335,8 +350,7 @@ exports.getEventsByEventStatus = async (req, res) => {
 
 
 exports.searchEventsByName = async (req, res) => {
-    console.log(req.query.eventname)
-    console.log(req.query.eventname.includes(" "))
+   
     await Event.find({ event_name: req.query.eventname })
         .populate({
             path: "event_owner", populate: {
@@ -349,7 +363,17 @@ exports.searchEventsByName = async (req, res) => {
 
         })
         .populate("event_owner.avatar_profile", "_id path filename ")
-        .populate("users", "_id username firstname lastname")
+        // .populate("users", "_id username firstname lastname")
+        .populate({
+            path: "users", populate: [{
+                path: "avatar_profile",
+                model: "Avatar",
+                select: "-refUser -__v"
+            }, { path: "photos", model: "UserPhoto", select: "-refUser -__v" }],
+            select:
+                "-email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -usertype -role -createdAt  -__v"
+
+        })
         .populate("event_photo", "_id path contentType filename")
         .exec((err, events) => {
             if (err) {
@@ -386,8 +410,28 @@ exports.searchEventsByName = async (req, res) => {
 }
 exports.getGoingEvents = async (req, res) => {
     await Event.find({ users: { $in: [req.query.userId] } })
-        .populate("users", "_id username firstname lastname avatar_profile")
-        .populate("avatar_profile", "_id path contentType filename")
+        // .populate("users", "_id username firstname lastname avatar_profile")
+        // .populate("avatar_profile", "_id path contentType filename")
+        .populate({
+            path: "event_owner", populate: {
+                path: "avatar_profile",
+                model: "Avatar",
+                select: "-refUser -__v"
+            },
+            select:
+                "-email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -photos -usertype -role -birthday -createdAt -about -livesIn -job -company -school -__v"
+
+        })
+        .populate({
+            path: "users", populate: [{
+                path: "avatar_profile",
+                model: "Avatar",
+                select: "-refUser -__v"
+            }, { path: "photos", model: "UserPhoto", select: "-refUser -__v" }],
+            select:
+                "-email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -usertype -role -createdAt  -__v"
+
+        })
         .exec((err, events) => {
             if (err) {
                 return res.status(400).json({ error: err })
@@ -413,7 +457,16 @@ exports.getYourEvents = async (req, res) => {
         })
         .populate("event_cover", "_id path contentType filename")
         .populate("users", "_id username firstname lastname avatar_profile")
-        .populate("avatar_profile", "_id path contentType filename")
+        .populate({
+            path: "users", populate: [{
+                path: "avatar_profile",
+                model: "Avatar",
+                select: "-refUser -__v"
+            }, { path: "photos", model: "UserPhoto", select: "-refUser -__v" }],
+            select:
+                "-email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -usertype -role -createdAt  -__v"
+
+        })
         .exec((err, events) => {
             if (err) {
                 return res.status(400).json({ error: err })
@@ -424,4 +477,26 @@ exports.getYourEvents = async (req, res) => {
 
             return res.status(200).json(events);
         })
+}
+exports.goToEvent = async (req, res) => {
+    
+    var userInEventExists = req.event.users.map(element => element._id).includes(req.body.yourId);
+  
+    if (userInEventExists) {
+        return res.status(400).json({ error: "user going to this event" })
+    } else {
+        req.event.users.push(req.body.yourId);
+        req.event.save();
+        await User.findByIdAndUpdate(req.body.yourId, { $push: { eventsGoing: req.event._id } }) //$push adicionando evento que ele vai ao usuario
+            .exec((err, result) => {
+                if (err || !result) {
+                    return res.status(400).json({ error: err })
+                }
+            });
+
+    }
+}
+exports.removeUserFromEvent = async (req, res) => {
+    console.log(req.body.yourId);
+    console.log(req.event);
 }

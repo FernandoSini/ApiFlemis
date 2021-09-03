@@ -1,6 +1,10 @@
 const express = require("express")
 const router = express.Router()
-const { createEvent, getEventById, getEvents, getSingleEvent, updateEvent, isEventOwner, getEventsByEventStatus, searchEventsByName, getGoingEvents, eventPhotoUpload, uploadEventCover, getYourEvents } = require("../controllers/event")
+const { createEvent, getEventById, getEvents,
+    getSingleEvent, updateEvent, isEventOwner,
+    getEventsByEventStatus, searchEventsByName,
+    getGoingEvents, eventPhotoUpload, uploadEventCover,
+    getYourEvents, goToEvent } = require("../controllers/event")
 const { requireLogin } = require("../controllers/auth")
 
 router.get("/api/events/all", requireLogin, getEvents)
@@ -12,7 +16,9 @@ router.get("/api/event/users/:eventId")
 router.get("/api/events/yourEvents?:yourId", requireLogin, getYourEvents)
 router.get("/api/events?:eventstatus", requireLogin, getEventsByEventStatus)
 router.get("/api/events/find?:eventname", requireLogin, searchEventsByName)
-router.get("/api/events/goingEvents?:userId", getGoingEvents)
+router.get("/api/events/goingEvents?:userId", requireLogin, getGoingEvents)
+router.post("/api/events/:eventId/go", requireLogin, goToEvent)
+router.put("/api/events/:eventId/removeUser")
 
 router.param("eventId", getEventById)
 // router.param("eventStatus", getEventStatus)

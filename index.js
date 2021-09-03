@@ -85,15 +85,11 @@ mongoose.connection.on("error", err => {
 
 //socket funcionando
 io.of("/api/match/chat").on("connection", (socket) => {
-    console.log("connected");
-    console.log(socket.id, "has joined");
     socket.on("signIn", (id) => {
-        // console.log(id);
-
         socket.join(id);
     });
     socket.on("loadMessages", async (matchId) => {
-        // console.log("match" + matchId);
+        
         let messages = []
         messages = await Message.find({ match: matchId })
             .populate("messages", "from content target message_status timestamp")
@@ -102,7 +98,7 @@ io.of("/api/match/chat").on("connection", (socket) => {
             element.message_status = "DELIVERED";
             element.save();
         })
-        // console.log(messages)
+      
 
         socket.emit("carregarMensagens", messages);
 
@@ -110,11 +106,11 @@ io.of("/api/match/chat").on("connection", (socket) => {
 
 
     socket.on("sendMessage", async (msg) => {
-        console.log(msg);
+       
         socket.in(msg.targetId).emit("sendMessage", msg)
 
         let messageData = await new Message({ from: msg.yourId, content: msg.content, target: msg.targetId, match: msg.matchId, message_status: msg.message_status, timestamp: msg.timestamp }).save();
-        console.log(messageData._id)
+        
         await Match.findByIdAndUpdate(msg.matchId, { $push: { messages: messageData._id } }).exec((err, result) => console.log(result));
     });
 });

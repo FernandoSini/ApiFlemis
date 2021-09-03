@@ -148,7 +148,7 @@ userSchema.methods = {
                 .update(password).digest("hex");
 
         } catch (error) {
-            console.log(error);
+
             return "";
 
         }

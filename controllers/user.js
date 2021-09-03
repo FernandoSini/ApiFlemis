@@ -43,7 +43,7 @@ exports.targetUserById = (req, res, next, id) => {
 exports.getUserProfile = (req, res) => {
     req.profile.hashed_password = undefined;
     req.profile.salt = undefined;
-    console.log(req.profile)
+ 
     return res.status(200).json(req.profile)
 }
 
@@ -61,7 +61,7 @@ exports.avatarUpload = multer({
     storage: avatarStorage,
 
     fileFilter: (req, file, cb) => {
-        console.log("caindo aqui")
+       
         // console.log(req.profile._id)
         // console.log(file)
         if (!file.mimetype === "image/gif"
@@ -100,7 +100,7 @@ exports.uploadAvatar = async (req, res, next) => {
                 path: req.file.path,
                 filename: req.file.filename
             });
-            console.log("fala ai galera")
+          
             await avatarCreate.save((error, result) => {
                 if (error) {
                     return res.status(400).json(error);
@@ -114,8 +114,7 @@ exports.uploadAvatar = async (req, res, next) => {
 
         } else {
             let user = req.profile;
-            console.log("foda-se")
-            // console.log(req.profile)
+    
 
             await Avatar.findOneAndUpdate({ refUser: user._id },
                 { filename: req.file.filename, path: req.file.path, contentType: req.file.mimetype },
@@ -129,14 +128,14 @@ exports.uploadAvatar = async (req, res, next) => {
                     user.avatar_profile.contentType = result.contentType;
                     user.avatar_profile.filename = result.filename;
                     user.save();
-                    console.log(result);
+                   
                     return res.status(200).json(result);
 
                 })
         }
 
     } catch (e) {
-        console.log("aqui")
+     
         return res.status(400).json({ error: "Error while upload image: " + e.toString() })
     }
 
@@ -258,7 +257,7 @@ exports.uploadAvatar = async (req, res, next) => {
 //     }
 // }
 exports.getAvatar = (req, res, next) => {
-    console.log(req.profile.avatar_profile)
+    
     if (req.profile.avatar_profile) {
         return res.json(`http://localhost:3000/api/${req.profile.avatar_profile.path}`);
 
@@ -268,7 +267,7 @@ exports.getAvatar = (req, res, next) => {
 }
 
 exports.updateUser = async (req, res) => {
-    console.log(req.profile._id)
+   
     await User.findByIdAndUpdate({ _id: req.profile._id }, {
         $set: req.body
     }, { new: true })
@@ -276,26 +275,25 @@ exports.updateUser = async (req, res) => {
         .populate("photos", "_id path filename contentType")
         .exec((err, data) => {
             if (err || !data) {
-                console.log(err);
+               
                 return res.status(400).json({ err: "Can't updateData" })
             } else {
-                console.log(data)
+                
                 return res.status(200).json(data);
                 // return res.status(200).json("User updated successfully")
             }
         })
 }
 exports.likeUser = async (req, res) => {
-    // console.log("profile: " + req.profile);
-    // console.log("target: " + req.userTarget)
+   
     let you = req.profile;
     let targetUser = req.userTarget;
 
 
     var likeExists = you.likesSent.map(element => element._id).includes(targetUser._id)
-    console.log(likeExists)
+    
     var targetLikeYouExists = you.likesReceived.map(element => element._id).includes(targetUser._id);
-    console.log(targetLikeYouExists)
+   
 
     if (likeExists) {
 
@@ -328,7 +326,7 @@ exports.likeUser = async (req, res) => {
                             you.save()
                             targetUser.matches.push(result._id);
                             targetUser.save()
-                            console.log(result)
+                        
 
 
 
@@ -394,7 +392,7 @@ exports.deleteUser = (req, res, next) => {
 }
 
 exports.getUserByDifferentGender = (req, res) => {
-    console.log(req.query.gender)
+   
     User.find({ gender: { $ne: req.query.gender } })
         .populate("likesSent", "_id firstname lastname username birthday")
         .populate("likesReceived", "_id firstname lastname username birthday")
@@ -454,7 +452,7 @@ exports.getLikes = async (req, res) => {
 }
 
 exports.getLikesReceived = async (req, res) => {
-    console.log(req.profile._id)
+   
     await User.find({ likesSent: req.profile._id })
         .populate("avatar_profile", "_id path contentType filename")
         .select("-likesSent -likesReceived -gender -matches -eventsGoing -eventsCreated -email -createdAt -__v -photos")
@@ -481,7 +479,7 @@ exports.uploadPhotos = async (req, res) => {
 
 
         if (err) {
-            console.log(err)
+          
             return res.status(400).json({ error: err })
         }
 
