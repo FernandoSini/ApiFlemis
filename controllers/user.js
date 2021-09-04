@@ -9,8 +9,7 @@ const Avatar = require("../models/avatar")
 const Match = require("../models/match")
 const UserPhoto = require("../models/userPhotos");
 const user = require("../models/user")
-
-
+//teste
 exports.userById = (req, res, next, id) => {
     User.findById(id)
         .populate("likesSent", "_id username avatar_profile")
