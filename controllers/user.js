@@ -9,7 +9,7 @@ const Avatar = require("../models/avatar")
 const Match = require("../models/match")
 const UserPhoto = require("../models/userPhotos");
 const user = require("../models/user")
-//testezinho
+
 
 exports.userById = (req, res, next, id) => {
     User.findById(id)
