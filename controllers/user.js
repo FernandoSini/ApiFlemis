@@ -141,7 +141,6 @@ exports.uploadAvatar = async (req, res, next) => {
 
 
 }
-//teste
 // exports.updateAvatar = async (req, res, next) => {
 //     // console.log(req.profile)
 
