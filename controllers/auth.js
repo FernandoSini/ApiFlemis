@@ -38,7 +38,7 @@ exports.login = (req, res) => {
                 return res.status(401).json({ error: "Username and password not found" })
             }
 
-            const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" })
+            const token = jwt.sign({ _id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: /* "1h" */ "15d" })
             res.cookie("token", token, { expiresIn: /* '1h' */ new Date() + 9999 });
 
             const { _id, username, firstname, lastname, birthday, gender, roleUser, email, avatar_profile, about, usertype, job, livesin, school, company, photos, likesSent, likesReceived, matches, role, createdAt } = user;
@@ -59,9 +59,9 @@ exports.logout = (req, res) => {
 }
 
 exports.verifyUserExists = async (req, res, next) => {
-    
+
     let userExists = await User.exists({ $or: [{ email: req.body.data }, { username: req.body.data }] });
-  
+
     if (!userExists) {
         return res.status(404).json({ error: "Not found user with this data" })
     } else {
@@ -90,7 +90,7 @@ exports.resetPassword = async (req, res) => {
 
         user.save((err, result) => {
             if (err) {
-             
+
                 return res.status(400).json({ error: err });
             }
 
