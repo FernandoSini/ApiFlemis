@@ -95,14 +95,14 @@ exports.getEvents = async (req, res) => {
                 eventList.forEach(event => {
                     event.event_owner.hashed_password = undefined;
                     event.event_owner.salt = undefined;
-                   
+
                     let now = new Date()
                     if (now >= event.end_date || event.event_status == "ENDED") {
-                     
+
                         event.event_status = "ENDED"
                         event.save()
                     } else if (now < event.start_date) {
-                       
+
                         event.event_status = "INCOMING"
                         event.save();
                     } else {
@@ -151,7 +151,7 @@ exports.updateEvent = async (req, res) => {
 
 
         if (err) {
-            
+
             return res.status(400).json({ error: err })
         }
 
@@ -167,9 +167,9 @@ exports.updateEvent = async (req, res) => {
 
 
             let eventCoverExists = await EventPhoto.exists({ refEvent: req.event._id })
-           
+
             if (!eventCoverExists) {
-              
+
                 let eventphoto = new EventPhoto({
                     refEvent: req.event._id,
                     contentType: files.img.type,
@@ -179,7 +179,7 @@ exports.updateEvent = async (req, res) => {
                 eventphoto.save();
                 req.event.event_cover = eventphoto._id
             } else {
-                
+
                 let eventPhoto = await EventPhoto.findOneAndUpdate({ refEvent: req.event._id },
                     { filename: files.img.name, path: files.img.path, contentType: files.img.type },
                     { $new: true })
@@ -202,7 +202,7 @@ exports.updateEvent = async (req, res) => {
 
         event.save((err, result) => {
             if (err) {
-            
+
                 return res.status(400).json({ error: err })
             }
 
@@ -350,7 +350,7 @@ exports.getEventsByEventStatus = async (req, res) => {
 
 
 exports.searchEventsByName = async (req, res) => {
-   
+
     await Event.find({ event_name: req.query.eventname })
         .populate({
             path: "event_owner", populate: {
@@ -362,6 +362,7 @@ exports.searchEventsByName = async (req, res) => {
                 "-email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -photos -usertype -role -birthday -createdAt -about -livesIn -job -company -school -__v"
 
         })
+        .populate("event_cover", "_id path filename contentType")
         .populate("event_owner.avatar_profile", "_id path filename ")
         // .populate("users", "_id username firstname lastname")
         .populate({
@@ -479,9 +480,9 @@ exports.getYourEvents = async (req, res) => {
         })
 }
 exports.goToEvent = async (req, res) => {
-    
+
     var userInEventExists = req.event.users.map(element => element._id).includes(req.body.yourId);
-  
+
     if (userInEventExists) {
         return res.status(400).json({ error: "user going to this event" })
     } else {
