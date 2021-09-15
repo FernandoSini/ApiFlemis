@@ -106,7 +106,7 @@ exports.uploadAvatar = async (req, res, next) => {
 
             await avatarCreate.save((error, result) => {
                 if (error) {
-                    return res.status(400).json(error);
+                    return res.status(400).json({ err: error });
                 }
                 userData.avatar_profile = result._id;
                 userData.save()
@@ -124,7 +124,7 @@ exports.uploadAvatar = async (req, res, next) => {
                 { new: true })
                 .exec((err, result) => {
                     if (err || !result) {
-                        return res.status(400).json({ err })
+                        return res.status(400).json({ err: err })
                     }
                     user.avatar_profile._id = result._id;
                     user.avatar_profile.path = result.path;
@@ -522,20 +522,27 @@ exports.deleteAvatar = async (req, res) => {
     // req.profile.avatar_profile = undefined;
     // req.profile.save();
     // console.log("caindo aqui" + avatar_profile._id);
-    await User.findOneAndUpdate({ _id: req.profile._id },
-        { $unset: { avatar_profile: avatar_profile._id } },
-        { new: true })
-        .exec((err, userData) => {
-            Avatar.findOneAndDelete({ _id: req.profile.avatar_profile._id },
-            )
-                .exec((err, result) => {
-                    if (err) {
-                        return res.status(400).json({ error: "Can't remove avatar" + err })
-                    }
-                    return res.status(200).json("removed");
-                })
-        });
+    if (avatar_profile) {
+        await User.findOneAndUpdate({ _id: req.profile._id },
+            { $unset: { avatar_profile: avatar_profile._id } },
+            { new: true })
+            .exec((err, userData) => {
+                if (err) {
+                    return res.status(400).json({ err: err });
+                }
 
+                Avatar.findOneAndDelete({ _id: req.profile.avatar_profile._id },
+                )
+                    .exec((err, result) => {
+                        if (err) {
+                            return res.status(400).json({ err: "Can't remove avatar" + err })
+                        }
+                        return res.status(200).json({ message: "removed" });
+                    })
+            });
+    } else {
+        return res.status(400).json({ err: "Can't delete avatar that is null" });
+    }
 
 
 }
