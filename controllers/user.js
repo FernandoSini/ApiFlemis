@@ -8,7 +8,10 @@ const path = require("path")
 const Avatar = require("../models/avatar")
 const Match = require("../models/match")
 const UserPhoto = require("../models/userPhotos");
-const user = require("../models/user")
+const Event = require("../models/event")
+const EventPhoto = require("../models/eventPhotos")
+const Message = require("../models/message")
+
 
 exports.userById = (req, res, next, id) => {
     User.findById(id)
@@ -514,13 +517,52 @@ exports.uploadPhotos = async (req, res) => {
 }
 exports.deleteAvatar = async (req, res) => {
     let avatar_profile = req.profile.avatar_profile;
-    avatar_profile.remove((err, avatar_profile) => {
-        if (err) {
-            return res.status(400).json({ error: "Can't remove avatar" });
-        }
-        return res.status(200).json("removed");
-    })
+    //esses dois métodos funcionam para deletar um usuario
+    // req.profile.avatar_profile.remove();
+    // req.profile.avatar_profile = undefined;
+    // req.profile.save();
+    // console.log("caindo aqui" + avatar_profile._id);
+    await User.findOneAndUpdate({ _id: req.profile._id },
+        { $unset: { avatar_profile: avatar_profile._id } },
+        { new: true })
+        .exec((err, userData) => {
+            Avatar.findOneAndDelete({ _id: req.profile.avatar_profile._id },
+            )
+                .exec((err, result) => {
+                    if (err) {
+                        return res.status(400).json({ error: "Can't remove avatar" + err })
+                    }
+                    return res.status(200).json("removed");
+                })
+        });
 
+
+
+}
+
+exports.deleteUser = async (req, res) => {
+    await User.updateMany(
+        {
+            $or: [{ likesSent: req.body.yourId }, { likesReceived: req.body.yourId }]
+        },
+        {
+            $pull: [{ likesSent: req.body.yourId }, { likesReceived: req.body.yourId }]
+        },
+        {
+            new: true
+        }
+    );
+    await Match.deleteMany({ $or: [{ user1: req.body.yourId }, { user2: req.body.yourId }] });
+    await Message.deleteMany({ $or: [{ from: req.body.yourId }, { target: req.body.yourId }] });
+    await Event.deleteMany({ event_owner: req.body.yourId });
+    await Avatar.deleteOne({ refUser: req.body.yourId });
+    await User.findByIdAndDelete({ _id: req.body.yourId }).exec((err, result) => {
+        if (err) {
+            return res.status(400).json({ error: err })
+        }
+
+        return res.status(200).json("User deleted successfully");
+    })
 }
 
 
