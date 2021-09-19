@@ -20,12 +20,12 @@ exports.getEventById = (req, res, next, id) => {
                 return res.status(400).json("Event not found")
             }
             req.event = event;
-            let now = new Date().toUTCString()
+            let now = new Date()
             if (now >= req.event.end_date) {
 
                 req.event.event_status = "ENDED"
 
-            } else if (now < req.event.start_date) {
+            } else if (now < event.start_date) {
 
                 req.event.event_status = "INCOMING"
 
@@ -58,7 +58,7 @@ exports.getSingleEvent = async (req, res) => {
                 return res.status(400).json(err)
             } else {
 
-                let now = new Date().toUTCString()
+                let now = new Date()
                 if (now >= event.end_date || event.event_status == "ENDED") {
 
                     event.event_status = "ENDED"
@@ -96,7 +96,7 @@ exports.getEvents = async (req, res) => {
                     event.event_owner.hashed_password = undefined;
                     event.event_owner.salt = undefined;
 
-                    let now = new Date().toUTCString()
+                    let now = new Date()
                     if (now >= event.end_date || event.event_status == "ENDED") {
 
                         event.event_status = "ENDED"
@@ -330,23 +330,16 @@ exports.getEventsByEventStatus = async (req, res) => {
             events.forEach(event => {
                 event.event_owner.hashed_password = undefined;
                 event.event_owner.salt = undefined;
-                let now = new Date().toUTCString()
-                // if (now >= event.end_date || event.event_status == "ENDED") {
-                //     event.event_status = "ENDED"
-                //     event.save()
-                // } else if (now < event.start_date) {
-                //     event.event_status = "INCOMING"
-                //     event.save();
-                // } else {
-                //     event.event_status = "HAPPENING";
-                //     event.save();
-                // }
-                if (now < event.start_date) {
-                    event.event_status = "INCOMING"
-                } else if (now >= event.start_date && now <= event.end_date) {
-                    event.event_status = "HAPPENING";
-                } else {
+                let now = new Date()
+                if (now >= event.end_date || event.event_status == "ENDED") {
                     event.event_status = "ENDED"
+                    event.save()
+                } else if (now < event.start_date) {
+                    event.event_status = "INCOMING"
+                    event.save();
+                } else {
+                    event.event_status = "HAPPENING";
+                    event.save();
                 }
             })
 
@@ -399,7 +392,7 @@ exports.searchEventsByName = async (req, res) => {
             events.forEach(event => {
                 event.event_owner.hashed_password = undefined;
                 event.event_owner.salt = undefined;
-                let now = new Date().toUTCString()
+                let now = new Date()
                 if (now >= event.end_date || event.event_status == "ENDED") {
                     event.event_status = "ENDED"
                     event.save()
