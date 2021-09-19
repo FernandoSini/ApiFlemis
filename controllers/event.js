@@ -35,15 +35,25 @@ exports.getEventById = (req, res, next, id) => {
             //     req.event.event_status = "HAPPENING";
 
             // }
-            if (now >= endDate && now > startDate) {
-                req.event.event_status = "ENDED";
-                req.event.save();
-            } else if (now < startDate && now < endDate) {
-                req.event.event_status = "INCOMING"
-                req.event.save()
+            // if (now >= endDate && now > startDate) {
+            //     req.event.event_status = "ENDED";
+            //     req.event.save();
+            // } else if (now < startDate && now < endDate) {
+            //     req.event.event_status = "INCOMING"
+            //     req.event.save()
+            // } else {
+            //     req.event.event_status = "HAPPENING"
+            //     req.event.save();
+            // }
+            if (now < startDate) {
+                event.event_status = "INCOMING";
+                event.save();
+            } else if (now >= startDate && now <= endDate) {
+                event.event_status = "HAPPENING"
+                event.save()
             } else {
-                req.event.event_status = "HAPPENING"
-                req.event.save();
+                event.event_status = "ENDED"
+                event.save();
             }
             next()
         })
@@ -85,15 +95,25 @@ exports.getSingleEvent = async (req, res) => {
                 //     event.event_status = "HAPPENING";
                 //     event.save();
                 // }
-                if (now >= endDate && now > startDate) {
-                    event.event_status = "ENDED";
+                // if (now >= endDate && now > startDate) {
+                //     event.event_status = "ENDED";
+                //     event.save();
+                // } else if (now < startDate && now < endDate) {
+                //     event.event_status = "INCOMING"
+                //     event.save()
+                // } else {
+                //     event.event_status = "HAPPENING"
+                //     event.save()
+                // }
+                if (now < startDate) {
+                    event.event_status = "INCOMING";
                     event.save();
-                } else if (now < startDate && now < endDate) {
-                    event.event_status = "INCOMING"
-                    event.save()
-                } else {
+                } else if (now >= startDate && now <= endDate) {
                     event.event_status = "HAPPENING"
                     event.save()
+                } else {
+                    event.event_status = "ENDED"
+                    event.save();
                 }
 
 
@@ -136,14 +156,24 @@ exports.getEvents = async (req, res) => {
                     //     event.event_status = "HAPPENING";
                     //     event.save();
                     // }
-                    if (now >= endDate && now > startDate) {
-                        event.event_status = "ENDED";
+                    // if (now >= endDate && now > startDate) {
+                    //     event.event_status = "ENDED";
+                    //     event.save();
+                    // } else if (now < startDate && now < endDate) {
+                    //     event.event_status = "INCOMING"
+                    //     event.save();
+                    // } else {
+                    //     event.event_status = "HAPPENING"
+                    //     event.save();
+                    // }
+                    if (now < startDate) {
+                        event.event_status = "INCOMING";
                         event.save();
-                    } else if (now < startDate && now < endDate) {
-                        event.event_status = "INCOMING"
-                        event.save();
-                    } else {
+                    } else if (now >= startDate && now <= endDate) {
                         event.event_status = "HAPPENING"
+                        event.save()
+                    } else {
+                        event.event_status = "ENDED"
                         event.save();
                     }
                 })
@@ -383,15 +413,25 @@ exports.getEventsByEventStatus = async (req, res) => {
                 //     }
                 // })
 
-                if (now >= endDate && now > startDate) {
-                    event.event_status = "ENDED";
+                // if (now >= endDate && now > startDate) {
+                //     event.event_status = "ENDED";
+                //     event.save();
+                // } else if (now < startDate && now < endDate) {
+                //     event.event_status = "INCOMING"
+                //     event.save()
+                // } else {
+                //     event.event_status = "HAPPENING"
+                //     event.save()
+                // }
+                if (now < startDate) {
+                    event.event_status = "INCOMING";
                     event.save();
-                } else if (now < startDate && now < endDate) {
-                    event.event_status = "INCOMING"
-                    event.save()
-                } else {
+                } else if (now >= startDate && now <= endDate) {
                     event.event_status = "HAPPENING"
                     event.save()
+                } else {
+                    event.event_status = "ENDED"
+                    event.save();
                 }
             })
             return res.status(200).json(events);
@@ -456,15 +496,25 @@ exports.searchEventsByName = async (req, res) => {
                 //     event.event_status = "HAPPENING";
                 //     event.save();
                 // }
-                if (now >= endDate && now > startDate) {
-                    event.event_status = "ENDED";
+                // if (now >= endDate && now > startDate) {
+                //     event.event_status = "ENDED";
+                //     event.save();
+                // } else if (now < startDate && now < endDate) {
+                //     event.event_status = "INCOMING"
+                //     event.save()
+                // } else {
+                //     event.event_status = "HAPPENING"
+                //     event.save()
+                // }
+                if (now < startDate) {
+                    event.event_status = "INCOMING";
                     event.save();
-                } else if (now < startDate && now < endDate) {
-                    event.event_status = "INCOMING"
-                    event.save()
-                } else {
+                } else if (now >= startDate && now <= endDate) {
                     event.event_status = "HAPPENING"
                     event.save()
+                } else {
+                    event.event_status = "ENDED"
+                    event.save();
                 }
             })
 
