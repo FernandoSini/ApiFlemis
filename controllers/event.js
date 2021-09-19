@@ -38,7 +38,7 @@ exports.getEventById = (req, res, next, id) => {
             if (now >= endDate && now > startDate) {
                 req.event.event_status = "ENDED";
                 req.event.save();
-            } else if (now <= startDate) {
+            } else if (now < startDate && now < endDate) {
                 req.event.event_status = "INCOMING"
                 req.event.save()
             } else {
@@ -88,7 +88,7 @@ exports.getSingleEvent = async (req, res) => {
                 if (now >= endDate && now > startDate) {
                     event.event_status = "ENDED";
                     event.save();
-                } else if (now <= startDate) {
+                } else if (now < startDate && now < endDate) {
                     event.event_status = "INCOMING"
                     event.save()
                 } else {
@@ -139,7 +139,7 @@ exports.getEvents = async (req, res) => {
                     if (now >= endDate && now > startDate) {
                         event.event_status = "ENDED";
                         event.save();
-                    } else if (now <= startDate) {
+                    } else if (now < startDate && now < endDate) {
                         event.event_status = "INCOMING"
                         event.save();
                     } else {
@@ -386,7 +386,7 @@ exports.getEventsByEventStatus = async (req, res) => {
                 if (now >= endDate && now > startDate) {
                     event.event_status = "ENDED";
                     event.save();
-                } else if (now <= startDate) {
+                } else if (now < startDate && now < endDate) {
                     event.event_status = "INCOMING"
                     event.save()
                 } else {
@@ -459,7 +459,7 @@ exports.searchEventsByName = async (req, res) => {
                 if (now >= endDate && now > startDate) {
                     event.event_status = "ENDED";
                     event.save();
-                } else if (now <= startDate) {
+                } else if (now < startDate && now < endDate) {
                     event.event_status = "INCOMING"
                     event.save()
                 } else {
