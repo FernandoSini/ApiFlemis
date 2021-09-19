@@ -25,7 +25,7 @@ exports.getEventById = (req, res, next, id) => {
 
                 req.event.event_status = "ENDED"
 
-            } else if (now < event.start_date) {
+            } else if (now <= event.start_date) {
 
                 req.event.event_status = "INCOMING"
 
@@ -63,7 +63,7 @@ exports.getSingleEvent = async (req, res) => {
 
                     event.event_status = "ENDED"
                     event.save()
-                } else if (now < event.start_date) {
+                } else if (now <= event.start_date) {
 
                     event.event_status = "INCOMING"
                     event.save();
@@ -101,7 +101,7 @@ exports.getEvents = async (req, res) => {
 
                         event.event_status = "ENDED"
                         event.save()
-                    } else if (now < event.start_date) {
+                    } else if (now <= event.start_date) {
 
                         event.event_status = "INCOMING"
                         event.save();
@@ -336,7 +336,7 @@ exports.getEventsByEventStatus = async (req, res) => {
                 if (now >= event.end_date || event.event_status == "ENDED") {
                     event.event_status = "ENDED"
                     event.save()
-                } else if (now < event.start_date) {
+                } else if (now <= event.start_date) {
                     event.event_status = "INCOMING"
                     event.save();
                 } else {
@@ -398,7 +398,7 @@ exports.searchEventsByName = async (req, res) => {
                 if (now >= event.end_date || event.event_status == "ENDED") {
                     event.event_status = "ENDED"
                     event.save()
-                } else if (now < event.start_date) {
+                } else if (now <= event.start_date) {
                     event.event_status = "INCOMING"
                     event.save();
                 } else {
