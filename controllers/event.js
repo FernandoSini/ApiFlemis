@@ -101,8 +101,8 @@ exports.getEvents = async (req, res) => {
                     event.event_owner.salt = undefined;
 
                     let now = new Date(Date.now()).toUTCString;
-                    let endDate = new Date(Date(event.end_date)).toUTCString;
-                    let startDate = new Date(Date(event.start_date)).toUTCString;
+                    let endDate = new Date(Date(event.end_date).toString()).toUTCString;
+                    let startDate = new Date(Date(event.start_date).toString()).toUTCString;
 
                     if (now >= endDate || event.event_status == "ENDED") {
 
@@ -339,8 +339,8 @@ exports.getEventsByEventStatus = async (req, res) => {
                 event.event_owner.hashed_password = undefined;
                 event.event_owner.salt = undefined;
                 let now = new Date(Date.now()).toUTCString;
-                let endDate = new Date(Date(event.end_date)).toUTCString;
-                let startDate = new Date(Date(event.start_date)).toUTCString;
+                let endDate = new Date(Date(event.end_date.toString())).toUTCString;
+                let startDate = new Date(Date(event.start_date.toString())).toUTCString;
                 if (now >= endDate || event.event_status == "ENDED") {
                     event.event_status = "ENDED"
                     event.save()
@@ -403,9 +403,9 @@ exports.searchEventsByName = async (req, res) => {
                 event.event_owner.hashed_password = undefined;
                 event.event_owner.salt = undefined;
                 let now = new Date(Date.now()).toUTCString;
-                let endDate = new Date(Date(event.end_date)).toUTCString;
-                let startDate = new Date(Date(event.start_date)).toUTCString;
-                if (now >= endDate || event.event_status == "ENDED") {
+                let endDate = new Date(Date(event.end_date.toString())).toUTCString;
+                let startDate = new Date(Date(event.start_date.toString())).toUTCString;
+                if (endDate < now || event.event_status == "ENDED") {
                     event.event_status = "ENDED"
                     event.save()
                 } else if (now <= startDate) {
