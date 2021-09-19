@@ -20,7 +20,7 @@ exports.getEventById = (req, res, next, id) => {
                 return res.status(400).json("Event not found")
             }
             req.event = event;
-            let now = Date.UTC()
+            let now = new Date()
             if (now >= req.event.end_date) {
 
                 req.event.event_status = "ENDED"
@@ -58,7 +58,7 @@ exports.getSingleEvent = async (req, res) => {
                 return res.status(400).json(err)
             } else {
 
-                let now = Date.UTC()
+                let now = new Date()
                 if (now >= event.end_date || event.event_status == "ENDED") {
 
                     event.event_status = "ENDED"
@@ -96,7 +96,7 @@ exports.getEvents = async (req, res) => {
                     event.event_owner.hashed_password = undefined;
                     event.event_owner.salt = undefined;
 
-                    let now = Date.UTC()
+                    let now = new Date()
                     if (now >= event.end_date || event.event_status == "ENDED") {
 
                         event.event_status = "ENDED"
@@ -219,7 +219,7 @@ const eventStorage = multer.diskStorage({
     filename: (req, file, cb) => {
         cb(null, uuid() + path.extname(file.originalname));
         //se não der certo vamos usar
-        //cb(null, Date.UTC()+".jpg")
+        //cb(null, new Date()+".jpg")
     }
 
 })
@@ -290,6 +290,7 @@ exports.uploadEventCover = async (req, res, next) => {
 
 }
 exports.getEventsByEventStatus = async (req, res) => {
+
     await Event.find({ event_status: req.query.eventstatus })
         .populate({
             path: "event_owner", populate: {
@@ -330,11 +331,13 @@ exports.getEventsByEventStatus = async (req, res) => {
             events.forEach(event => {
                 event.event_owner.hashed_password = undefined;
                 event.event_owner.salt = undefined;
-                let now = Date.UTC()
-                if (now >= event.end_date || event.event_status == "ENDED") {
+                let now = new Date()
+                let endDate = new Date(event.end_date).toUTCString;
+                let startDate = new Date(event.start_date).toUTCString;
+                if (now >= endDate || event.event_status == "ENDED") {
                     event.event_status = "ENDED"
                     event.save()
-                } else if (now <= event.start_date) {
+                } else if (now <= startDate) {
                     event.event_status = "INCOMING"
                     event.save();
                 } else {
@@ -392,7 +395,7 @@ exports.searchEventsByName = async (req, res) => {
             events.forEach(event => {
                 event.event_owner.hashed_password = undefined;
                 event.event_owner.salt = undefined;
-                let now = Date.UTC()
+                let now = new Date()
                 if (now >= event.end_date || event.event_status == "ENDED") {
                     event.event_status = "ENDED"
                     event.save()
