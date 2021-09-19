@@ -58,12 +58,13 @@ exports.getSingleEvent = async (req, res) => {
                 return res.status(400).json(err)
             } else {
 
-                let now = new Date()
+                let now = new Date().toUTCString()
+                console.log(now);
                 if (now >= event.end_date || event.event_status == "ENDED") {
 
                     event.event_status = "ENDED"
                     event.save()
-                } else if (now < req.event.start_date) {
+                } else if (now < event.start_date) {
 
                     event.event_status = "INCOMING"
                     event.save();
