@@ -21,8 +21,8 @@ exports.getEventById = (req, res, next, id) => {
             }
             req.event = event;
             let now = new Date(Date.now()).toUTCString;
-            let endDate = new Date(Date(req.event.end_date)).toUTCString;
-            let startDate = new Date(Date(req.event.start_date)).toUTCString;
+            let endDate = new Date(Date(req.event.end_date.toString())).toUTCString;
+            let startDate = new Date(Date(req.event.start_date.toString())).toUTCString;
             if (now >= endDate) {
 
                 req.event.event_status = "ENDED"
@@ -61,8 +61,8 @@ exports.getSingleEvent = async (req, res) => {
             } else {
 
                 let now = new Date(Date.now()).toUTCString;
-                let endDate = new Date(Date(event.end_date)).toUTCString;
-                let startDate = new Date(Date(event.start_date)).toUTCString;
+                let endDate = new Date(Date(event.end_date.toString())).toUTCString;
+                let startDate = new Date(Date(event.start_date.toString())).toUTCString;
                 if (now >= endDate || event.event_status == "ENDED") {
 
                     event.event_status = "ENDED"
@@ -101,8 +101,8 @@ exports.getEvents = async (req, res) => {
                     event.event_owner.salt = undefined;
 
                     let now = new Date(Date.now()).toUTCString;
-                    let endDate = new Date(Date(event.end_date).toString()).toUTCString;
-                    let startDate = new Date(Date(event.start_date).toString()).toUTCString;
+                    let endDate = new Date(Date(event.end_date.toString())).toUTCString;
+                    let startDate = new Date(Date(event.start_date.toString())).toUTCString;
 
                     if (now >= endDate || event.event_status == "ENDED") {
 
