@@ -20,17 +20,17 @@ exports.getEventById = (req, res, next, id) => {
                 return res.status(400).json("Event not found")
             }
             req.event = event;
-            let now = new Date().toUTCString()
+            let now = new Date()
             if (now >= req.event.end_date) {
 
                 req.event.event_status = "ENDED"
 
-            } else if (now >= req.event.start_date || now < req.event.end_date) {
+            } else if (now < event.start_date) {
 
-                req.event.event_status = "HAPPENING"
+                req.event.event_status = "INCOMING"
 
             } else {
-                req.event.event_status = "INCOMING";
+                req.event.event_status = "HAPPENING";
 
             }
             next()
@@ -63,7 +63,7 @@ exports.getSingleEvent = async (req, res) => {
 
                     event.event_status = "ENDED"
                     event.save()
-                } else if (now < event.start_date) {
+                } else if (now < req.event.start_date) {
 
                     event.event_status = "INCOMING"
                     event.save();
@@ -330,15 +330,15 @@ exports.getEventsByEventStatus = async (req, res) => {
             events.forEach(event => {
                 event.event_owner.hashed_password = undefined;
                 event.event_owner.salt = undefined;
-                let now = new Date().toUTCString()
+                let now = new Date()
                 if (now >= event.end_date || event.event_status == "ENDED") {
                     event.event_status = "ENDED"
                     event.save()
-                } else if (now >= event.start_date || now < event.end_date) {
-                    event.event_status = "HAPPENING"
+                } else if (now < event.start_date) {
+                    event.event_status = "INCOMING"
                     event.save();
                 } else {
-                    event.event_status = "INCOMING";
+                    event.event_status = "HAPPENING";
                     event.save();
                 }
             })
