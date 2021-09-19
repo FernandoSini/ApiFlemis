@@ -21,19 +21,27 @@ exports.getEventById = (req, res, next, id) => {
             }
             req.event = event;
             let now = new Date(Date.now()).toUTCString;
-            let endDate = new Date(Date(req.event.end_date)).toUTCString;
-            let startDate = new Date(Date(req.event.start_date)).toUTCString;
-            if (now >= endDate) {
+            let endDate = new Date(Date(req.event.end_date.toString())).toUTCString;
+            let startDate = new Date(Date(req.event.start_date.toString())).toUTCString;
+            // if (now >= endDate || event.event_status =="ENDED") {
 
-                req.event.event_status = "ENDED"
+            //     req.event.event_status = "ENDED"
 
+            // } else if (now <= startDate) {
+
+            //     req.event.event_status = "INCOMING"
+
+            // } else {
+            //     req.event.event_status = "HAPPENING";
+
+            // }
+            if (now >= endDate && now > startDate) {
+                event.event_status = "ENDED";
+                event.save();
             } else if (now <= startDate) {
-
-                req.event.event_status = "INCOMING"
-
+                event.event_status = "INCOMING"
             } else {
-                req.event.event_status = "HAPPENING";
-
+                event.event_status = "HAPPENING"
             }
             next()
         })
@@ -61,19 +69,27 @@ exports.getSingleEvent = async (req, res) => {
             } else {
 
                 let now = new Date(Date.now()).toUTCString;
-                let endDate = new Date(Date(event.end_date)).toUTCString;
-                let startDate = new Date(Date(event.start_date)).toUTCString;
-                if (now >= endDate || event.event_status == "ENDED") {
+                let endDate = new Date(Date(event.end_date.toString())).toUTCString;
+                let startDate = new Date(Date(event.start_date.toString())).toUTCString;
+                // if (now >= endDate || event.event_status == "ENDED") {
 
-                    event.event_status = "ENDED"
-                    event.save()
+                //     event.event_status = "ENDED"
+                //     event.save()
+                // } else if (now <= startDate) {
+
+                //     event.event_status = "INCOMING"
+                //     event.save();
+                // } else {
+                //     event.event_status = "HAPPENING";
+                //     event.save();
+                // }
+                if (now >= endDate && now > startDate) {
+                    event.event_status = "ENDED";
+                    event.save();
                 } else if (now <= startDate) {
-
                     event.event_status = "INCOMING"
-                    event.save();
                 } else {
-                    event.event_status = "HAPPENING";
-                    event.save();
+                    event.event_status = "HAPPENING"
                 }
 
 
@@ -101,20 +117,28 @@ exports.getEvents = async (req, res) => {
                     event.event_owner.salt = undefined;
 
                     let now = new Date(Date.now()).toUTCString;
-                    let endDate = new Date(Date(event.end_date).toString()).toUTCString;
-                    let startDate = new Date(Date(event.start_date).toString()).toUTCString;
+                    let endDate = new Date(Date(event.end_date.toString())).toUTCString;
+                    let startDate = new Date(Date(event.start_date.toString())).toUTCString;
 
-                    if (now >= endDate || event.event_status == "ENDED") {
+                    // if (now >= endDate || event.event_status == "ENDED") {
 
-                        event.event_status = "ENDED"
-                        event.save()
+                    //     event.event_status = "ENDED"
+                    //     event.save()
+                    // } else if (now <= startDate) {
+
+                    //     event.event_status = "INCOMING"
+                    //     event.save();
+                    // } else {
+                    //     event.event_status = "HAPPENING";
+                    //     event.save();
+                    // }
+                    if (now >= endDate && now > startDate) {
+                        event.event_status = "ENDED";
+                        event.save();
                     } else if (now <= startDate) {
-
                         event.event_status = "INCOMING"
-                        event.save();
                     } else {
-                        event.event_status = "HAPPENING";
-                        event.save();
+                        event.event_status = "HAPPENING"
                     }
                 })
 
@@ -341,27 +365,27 @@ exports.getEventsByEventStatus = async (req, res) => {
                 let now = new Date(Date.now()).toUTCString;
                 let endDate = new Date(Date(event.end_date.toString())).toUTCString;
                 let startDate = new Date(Date(event.start_date.toString())).toUTCString;
-            //     if (now >= endDate || event.event_status == "ENDED") {
-            //         event.event_status = "ENDED"
-            //         event.save()
-            //     } else if (now <= startDate) {
-            //         event.event_status = "INCOMING"
-            //         event.save();
-            //     } else {
-            //         event.event_status = "HAPPENING";
-            //         event.save();
-            //     }
-            // })
+                //     if (now >= endDate || event.event_status == "ENDED") {
+                //         event.event_status = "ENDED"
+                //         event.save()
+                //     } else if (now <= startDate) {
+                //         event.event_status = "INCOMING"
+                //         event.save();
+                //     } else {
+                //         event.event_status = "HAPPENING";
+                //         event.save();
+                //     }
+                // })
 
-            if(now>endDate && now>startDate){
+                if (now >= endDate && now > startDate) {
                     event.event_status = "ENDED";
                     event.save();
-            }else if(now<=startDate){
-                event.event_status = "INCOMING"
-            }else{
-                event.event_status = "HAPPENING"
-            }
-        })
+                } else if (now <= startDate) {
+                    event.event_status = "INCOMING"
+                } else {
+                    event.event_status = "HAPPENING"
+                }
+            })
             return res.status(200).json(events);
 
         })
