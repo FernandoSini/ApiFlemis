@@ -89,7 +89,7 @@ io.of("/api/match/chat").on("connection", (socket) => {
         socket.join(id);
     });
     socket.on("loadMessages", async (matchId) => {
-        
+
         let messages = []
         messages = await Message.find({ match: matchId })
             .populate("messages", "from content target message_status timestamp")
@@ -98,7 +98,7 @@ io.of("/api/match/chat").on("connection", (socket) => {
             element.message_status = "DELIVERED";
             element.save();
         })
-      
+
 
         socket.emit("carregarMensagens", messages);
 
@@ -106,11 +106,11 @@ io.of("/api/match/chat").on("connection", (socket) => {
 
 
     socket.on("sendMessage", async (msg) => {
-       
+
         socket.in(msg.targetId).emit("sendMessage", msg)
 
         let messageData = await new Message({ from: msg.yourId, content: msg.content, target: msg.targetId, match: msg.matchId, message_status: msg.message_status, timestamp: msg.timestamp }).save();
-        
+
         await Match.findByIdAndUpdate(msg.matchId, { $push: { messages: messageData._id } }).exec((err, result) => console.log(result));
     });
 });
