@@ -290,7 +290,7 @@ exports.uploadEventCover = async (req, res, next) => {
 
 }
 exports.getEventsByEventStatus = async (req, res) => {
-    console.log(Date.UTC())
+    console.log(Date.UTC);
     console.log(Date.now())
     await Event.find({ event_status: req.query.eventstatus })
         .populate({
