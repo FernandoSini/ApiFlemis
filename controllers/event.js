@@ -20,7 +20,7 @@ exports.getEventById = (req, res, next, id) => {
                 return res.status(400).json("Event not found")
             }
             req.event = event;
-            let now = new Date()
+            let now = new Date.now()
             if (now >= req.event.end_date) {
 
                 req.event.event_status = "ENDED"
@@ -58,8 +58,7 @@ exports.getSingleEvent = async (req, res) => {
                 return res.status(400).json(err)
             } else {
 
-                let now = new Date().toUTCString()
-                console.log(now);
+                let now = new Date.now()
                 if (now >= event.end_date || event.event_status == "ENDED") {
 
                     event.event_status = "ENDED"
@@ -97,7 +96,7 @@ exports.getEvents = async (req, res) => {
                     event.event_owner.hashed_password = undefined;
                     event.event_owner.salt = undefined;
 
-                    let now = new Date()
+                    let now = new Date.now()
                     if (now >= event.end_date || event.event_status == "ENDED") {
 
                         event.event_status = "ENDED"
@@ -331,7 +330,7 @@ exports.getEventsByEventStatus = async (req, res) => {
             events.forEach(event => {
                 event.event_owner.hashed_password = undefined;
                 event.event_owner.salt = undefined;
-                let now = new Date()
+                let now = new Date.now()
                 if (now >= event.end_date || event.event_status == "ENDED") {
                     event.event_status = "ENDED"
                     event.save()
@@ -393,7 +392,7 @@ exports.searchEventsByName = async (req, res) => {
             events.forEach(event => {
                 event.event_owner.hashed_password = undefined;
                 event.event_owner.salt = undefined;
-                let now = new Date()
+                let now = new Date.now()
                 if (now >= event.end_date || event.event_status == "ENDED") {
                     event.event_status = "ENDED"
                     event.save()
