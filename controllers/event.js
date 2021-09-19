@@ -36,12 +36,14 @@ exports.getEventById = (req, res, next, id) => {
 
             // }
             if (now >= endDate) {
-                event.event_status = "ENDED";
-                event.save();
+                req.event.event_status = "ENDED";
+                req.event.save();
             } else if (now <= startDate) {
-                event.event_status = "INCOMING"
+                req.event.event_status = "INCOMING"
+                req.event.save()
             } else {
-                event.event_status = "HAPPENING"
+                req.event.event_status = "HAPPENING"
+                req.event.save();
             }
             next()
         })
@@ -88,8 +90,10 @@ exports.getSingleEvent = async (req, res) => {
                     event.save();
                 } else if (now <= startDate) {
                     event.event_status = "INCOMING"
+                    event.save()
                 } else {
                     event.event_status = "HAPPENING"
+                    event.save()
                 }
 
 
@@ -137,8 +141,10 @@ exports.getEvents = async (req, res) => {
                         event.save();
                     } else if (now <= startDate) {
                         event.event_status = "INCOMING"
+                        event.save();
                     } else {
                         event.event_status = "HAPPENING"
+                        event.save();
                     }
                 })
 
@@ -382,8 +388,10 @@ exports.getEventsByEventStatus = async (req, res) => {
                     event.save();
                 } else if (now <= startDate) {
                     event.event_status = "INCOMING"
+                    event.save()
                 } else {
                     event.event_status = "HAPPENING"
+                    event.save()
                 }
             })
             return res.status(200).json(events);
