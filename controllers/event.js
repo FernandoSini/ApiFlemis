@@ -35,7 +35,7 @@ exports.getEventById = (req, res, next, id) => {
             //     req.event.event_status = "HAPPENING";
 
             // }
-            if (now >= endDate) {
+            if (now >= endDate && now > startDate) {
                 req.event.event_status = "ENDED";
                 req.event.save();
             } else if (now <= startDate) {
@@ -85,7 +85,7 @@ exports.getSingleEvent = async (req, res) => {
                 //     event.event_status = "HAPPENING";
                 //     event.save();
                 // }
-                if (now >= endDate) {
+                if (now >= endDate && now > startDate) {
                     event.event_status = "ENDED";
                     event.save();
                 } else if (now <= startDate) {
@@ -136,7 +136,7 @@ exports.getEvents = async (req, res) => {
                     //     event.event_status = "HAPPENING";
                     //     event.save();
                     // }
-                    if (now >= endDate) {
+                    if (now >= endDate && now > startDate) {
                         event.event_status = "ENDED";
                         event.save();
                     } else if (now <= startDate) {
@@ -383,7 +383,7 @@ exports.getEventsByEventStatus = async (req, res) => {
                 //     }
                 // })
 
-                if (now >= endDate) {
+                if (now >= endDate && now > startDate) {
                     event.event_status = "ENDED";
                     event.save();
                 } else if (now <= startDate) {
@@ -446,15 +446,25 @@ exports.searchEventsByName = async (req, res) => {
                 let now = new Date(Date.now()).toUTCString;
                 let endDate = new Date(Date(event.end_date.toString())).toUTCString;
                 let startDate = new Date(Date(event.start_date.toString())).toUTCString;
-                if (endDate >= now || event.event_status == "ENDED") {
-                    event.event_status = "ENDED"
-                    event.save()
+                // if (endDate >= now || event.event_status == "ENDED") {
+                //     event.event_status = "ENDED"
+                //     event.save()
+                // } else if (now <= startDate) {
+                //     event.event_status = "INCOMING"
+                //     event.save();
+                // } else {
+                //     event.event_status = "HAPPENING";
+                //     event.save();
+                // }
+                if (now >= endDate && now > startDate) {
+                    event.event_status = "ENDED";
+                    event.save();
                 } else if (now <= startDate) {
                     event.event_status = "INCOMING"
-                    event.save();
+                    event.save()
                 } else {
-                    event.event_status = "HAPPENING";
-                    event.save();
+                    event.event_status = "HAPPENING"
+                    event.save()
                 }
             })
 
