@@ -23,11 +23,11 @@ exports.getEventById = (req, res, next, id) => {
             let now = new Date(Date.now()).toUTCString;
             let endDate = new Date(Date(req.event.end_date)).toUTCString;
             let startDate = new Date(Date(req.event.start_date)).toUTCString;
-            if (now >= req.event.end_date) {
+            if (now >= endDate) {
 
                 req.event.event_status = "ENDED"
 
-            } else if (now <= event.start_date) {
+            } else if (now <= startDate) {
 
                 req.event.event_status = "INCOMING"
 
@@ -100,13 +100,15 @@ exports.getEvents = async (req, res) => {
                     event.event_owner.hashed_password = undefined;
                     event.event_owner.salt = undefined;
 
-                    let now = new Date()
-                    let startDate = new Date(event.n)
-                    if (now >= event.end_date || event.event_status == "ENDED") {
+                    let now = new Date(Date.now()).toUTCString;
+                    let endDate = new Date(Date(event.end_date)).toUTCString;
+                    let startDate = new Date(Date(event.start_date)).toUTCString;
+
+                    if (now >= endDate || event.event_status == "ENDED") {
 
                         event.event_status = "ENDED"
                         event.save()
-                    } else if (now <= event.start_date) {
+                    } else if (now <= startDate) {
 
                         event.event_status = "INCOMING"
                         event.save();
@@ -400,11 +402,13 @@ exports.searchEventsByName = async (req, res) => {
             events.forEach(event => {
                 event.event_owner.hashed_password = undefined;
                 event.event_owner.salt = undefined;
-                let now = new Date()
-                if (now >= event.end_date || event.event_status == "ENDED") {
+                let now = new Date(Date.now()).toUTCString;
+                let endDate = new Date(Date(event.end_date)).toUTCString;
+                let startDate = new Date(Date(event.start_date)).toUTCString;
+                if (now >= endDate || event.event_status == "ENDED") {
                     event.event_status = "ENDED"
                     event.save()
-                } else if (now <= event.start_date) {
+                } else if (now <= startDate) {
                     event.event_status = "INCOMING"
                     event.save();
                 } else {
