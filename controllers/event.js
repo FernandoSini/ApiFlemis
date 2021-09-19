@@ -25,12 +25,12 @@ exports.getEventById = (req, res, next, id) => {
 
                 req.event.event_status = "ENDED"
 
-            } else if (now < req.event.start_date) {
+            } else if (now >= req.event.start_date || now < req.event.end_date) {
 
-                req.event.event_status = "INCOMING"
+                req.event.event_status = "HAPPENING"
 
             } else {
-                req.event.event_status = "HAPPENING";
+                req.event.event_status = "INCOMING";
 
             }
             next()
@@ -334,11 +334,11 @@ exports.getEventsByEventStatus = async (req, res) => {
                 if (now >= event.end_date || event.event_status == "ENDED") {
                     event.event_status = "ENDED"
                     event.save()
-                } else if (now < event.start_date) {
-                    event.event_status = "INCOMING"
+                } else if (now >= event.start_date || now < event.end_date) {
+                    event.event_status = "HAPPENING"
                     event.save();
                 } else {
-                    event.event_status = "HAPPENING";
+                    event.event_status = "INCOMING";
                     event.save();
                 }
             })
