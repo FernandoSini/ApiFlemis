@@ -28,6 +28,28 @@ exports.login = (req, res) => {
         .populate("photos", "_id contentType path filename")
         .populate("likesSent", "_id username firstname lastname avatar_profile birthday")
         .populate("likesReceived", "_id username firstname lastname avatar_profile birthday")
+        .populate({
+            path: "likesReceived", populate: {
+                path: "avatar_profile",
+                model: "Avatar",
+                select: "-refUser -__v"
+            },
+            select:
+                "-salt -hashed_password -email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -photos -usertype -role -birthday -createdAt -about -livesIn -job -company -school -__v"
+
+        })
+        .populate({
+            path: "likesSent", populate: {
+                path: "avatar_profile",
+                model: "Avatar",
+                select: "-refUser -__v"
+            },
+            select:
+                "-salt -hashed_password -email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -photos -usertype -role -birthday -createdAt -about -livesIn -job -company -school -__v"
+
+        })
+        .populate("matches", "_id user1 user2")
+
         .exec((err, user) => {
             if (err || !user) {
                 return res.status(401).json({ error: "User with this username not found. Please register!" })
@@ -42,7 +64,7 @@ exports.login = (req, res) => {
             res.cookie("token", token, { expiresIn: /* '1h' */ new Date() + 9999 });
 
             const { _id, username, firstname, lastname, birthday, gender, roleUser, email, avatar_profile, about, usertype, job, livesin, school, company, photos, likesSent, likesReceived, matches, role, createdAt } = user;
-            return res.status(200).json({ _id, username, firstname, lastname, birthday, gender, roleUser, email, avatar_profile, about, usertype, job, livesin, school, company, photos, likesSent, likesReceived, matches, role, createdAt, token })
+            return res.status(200).json({ _id, username, firstname, lastname, birthday, gender, roleUser, email, avatar_profile, about, usertype, job, livesin, school, company, photos, likesSent, likesReceived, role, createdAt, token })
         })
 }
 

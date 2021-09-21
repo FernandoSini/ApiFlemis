@@ -357,7 +357,7 @@ exports.getEventsByEventStatus = async (req, res) => {
                 select: "-refUser -__v"
             },
             select:
-                "-email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -photos -usertype -role -birthday -createdAt -about -livesIn -job -company -school -__v"
+                "-email -salt -hashed_password -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -photos -usertype -role -birthday -createdAt -about -livesIn -job -company -school -__v"
 
         })
         .populate("event_owner.avatar_profile", "_id path filename ")
@@ -369,7 +369,7 @@ exports.getEventsByEventStatus = async (req, res) => {
                 select: "-refUser -__v"
             }, { path: "photos", model: "UserPhoto", select: "-refUser -__v" }],
             select:
-                "-email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -usertype -role  -createdAt  -__v"
+                "-email -salt -hashed_password -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -usertype -role  -createdAt  -__v"
 
         })
         .populate("event_cover", "_id path contentType filename")

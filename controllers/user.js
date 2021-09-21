@@ -276,11 +276,32 @@ exports.updateUser = async (req, res) => {
     }, { new: true })
         .populate("avatar_profile", "_id path filename contentType")
         .populate("photos", "_id path filename contentType")
+        .populate({
+            path: "likesReceived", populate: {
+                path: "avatar_profile",
+                model: "Avatar",
+                select: "-refUser -__v"
+            },
+            select:
+                "-salt -hashed_password -email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -photos -usertype -role -birthday -createdAt -about -livesIn -job -company -school -__v"
+
+        })
+        .populate({
+            path: "likesSent", populate: {
+                path: "avatar_profile",
+                model: "Avatar",
+                select: "-refUser -__v"
+            },
+            select:
+                "-salt -hashed_password -email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -photos -usertype -role -birthday -createdAt -about -livesIn -job -company -school -__v"
+
+        }).select("-matches")
         .exec((err, data) => {
             if (err || !data) {
 
                 return res.status(400).json({ err: "Can't updateData" })
             } else {
+
 
                 return res.status(200).json(data);
                 // return res.status(200).json("User updated successfully")
@@ -395,12 +416,14 @@ exports.deleteUser = (req, res, next) => {
 }
 
 exports.getUserByDifferentGender = (req, res) => {
-
-    User.find({ gender: { $ne: req.query.gender } })
+    console.log(req.query.yourId)
+    // User.find({ gender: { $ne: req.query.gender }, $and: { likesReceived: { $ne: req.query.yourId } } })
+    User.find({ $and: [{ gender: { $ne: req.query.gender } }, { likesReceived: { $ne: req.query.yourId } }] })
         .populate("likesSent", "_id firstname lastname username birthday")
         .populate("likesReceived", "_id firstname lastname username birthday")
         .populate("avatar_profile", "_id path contentType filename")
         .populate("photos", "_id path contentType filename")
+        .select("-matches -eventsGoing -eventsCreated")
         .exec((err, users) => {
             if (err || !users) {
                 if (!users || !users.length) {
