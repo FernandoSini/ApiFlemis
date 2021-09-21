@@ -12,7 +12,7 @@ const Event = require("../models/event")
 const EventPhoto = require("../models/eventPhotos")
 const Message = require("../models/message")
 
-
+// teste
 exports.userById = (req, res, next, id) => {
     User.findById(id)
         .populate("likesSent", "_id username avatar_profile")
