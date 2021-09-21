@@ -129,9 +129,9 @@ app.use(express.Router())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser());
-app.use("/api/uploads/user/avatar", express.static('./uploads/user/avatar'))
-app.use("/api/uploads/events/photo", express.static('./uploads/events/photo'))
-app.use("/api/uploads/user/photos", express.static('./uploads/user/photos'))
+app.use("/api/uploads/user/avatar", express.static(path.join(__dirname, '/uploads/user/avatar')))
+app.use("/api/uploads/events/photo", express.static(path.join(__dirname, '/uploads/events/photo')))
+app.use("/api/uploads/user/photos", express.static(path.join(__dirname, '/uploads/user/photos')))
 
 app.use("/", rotasAuth)
 app.use("/", rotasUser)
