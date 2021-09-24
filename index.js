@@ -10,6 +10,7 @@ const expressValidator = require("express-validator")
 var cookieParser = require("cookie-parser")
 const dotenv = require("dotenv")
 const fs = require("fs")
+dotenv.config()
 const rotasAuth = require("./routes/auth")
 const rotasUser = require("./routes/user")
 const rotasEvents = require("./routes/event")
@@ -17,7 +18,7 @@ const rotasMatch = require("./routes/match")
 const Message = require("./models/message")
 const Match = require("./models/match")
 const cors = require("cors")
-dotenv.config()
+
 
 //isso aqui foi adicionado junto a pasta public
 // app.use(express.static(path.join(__dirname, 'public')))
