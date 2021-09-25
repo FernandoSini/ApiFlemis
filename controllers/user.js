@@ -11,7 +11,9 @@ const UserPhoto = require("../models/userPhotos");
 const Event = require("../models/event")
 const EventPhoto = require("../models/eventPhotos")
 const Message = require("../models/message")
-
+var AWS = require("aws-sdk")
+var creds = new AWS.Credentials({ accessKeyId: process.env.AWS_ACCESS_KEY, secretAccessKey: process.env.AWS_SECRET_KEY, sessionToken: null })
+AWS.config.update({ credentials: creds, region: process.env.AWS_REGION })
 // teste
 exports.userById = (req, res, next, id) => {
     User.findById(id)
@@ -53,7 +55,8 @@ exports.getUserProfile = (req, res) => {
 const avatarStorage = multer.diskStorage({
     destination: "./uploads/user/avatar",
     filename: (req, file, cb) => {
-        cb(null, uuid() + path.extname(file.originalname));
+
+        cb(null, req.profile._id + Date.now() + path.extname(file.originalname));
         //se não der certo vamos usar
         //cb(null, Date.now()+".jpg")
     }
@@ -85,56 +88,95 @@ exports.uploadAvatar = async (req, res, next) => {
     // console.log(req.profile)
     try {
 
+
         if (!req.file.mimetype === "image/gif"
             || !req.file.mimetype === "image/png"
             || !req.file.mimetype === "image/jpeg"
             || !req.file.mimetype === "image/jpg") {
             return res.status(400).json({ error: "Needs to be image or gif" })
         }
+        const fileContent = fs.readFileSync(req.file.path)
+        var params = {
+            acl: 'public-read',
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: req.file.filename,
+            Body: fileContent
 
-
+        }
+        var s3 = new AWS.S3({ credentials: creds });
+        // console.log(s3)
 
         let existAvatar = await Avatar.exists({ refUser: req.profile._id });
         if (!existAvatar) {
-            let userData = req.profile
-            let avatarCreate = new Avatar({
-                refUser: req.profile._id,
-                contentType: req.file.mimeType,
-                path: req.file.path,
-                filename: req.file.filename
+
+            s3.upload(params, async (err, data) => {
+                if (err) {
+
+                    return res.status(400).json({ err: err });
+                }
+                let userData = req.profile
+                let avatarCreate = new Avatar({
+                    refUser: req.profile._id,
+                    contentType: req.file.mimetype,
+                    // path: req.file.path,
+                    path: data.Location,
+                    filename: req.file.filename
+                });
+
+                await avatarCreate.save((error, result) => {
+                    if (error) {
+                        return res.status(400).json({ err: error });
+                    }
+
+                    userData.avatar_profile = result._id;
+                    userData.save()
+
+                    return res.json(result)
+
+                })
             });
 
-            await avatarCreate.save((error, result) => {
-                if (error) {
-                    return res.status(400).json({ err: error });
-                }
-                userData.avatar_profile = result._id;
-                userData.save()
-
-                return res.json(result)
-
-            })
 
         } else {
             let user = req.profile;
 
 
-            await Avatar.findOneAndUpdate({ refUser: user._id },
-                { filename: req.file.filename, path: req.file.path, contentType: req.file.mimetype },
-                { new: true })
-                .exec((err, result) => {
-                    if (err || !result) {
-                        return res.status(400).json({ err: err })
-                    }
-                    user.avatar_profile._id = result._id;
-                    user.avatar_profile.path = result.path;
-                    user.avatar_profile.contentType = result.contentType;
-                    user.avatar_profile.filename = result.filename;
-                    user.save();
+            // var fileUpdatedUrl = s3.upload(params, (err, data) => {
+            //     if (err) {
+            //         console.log("1" + err)
+            //         throw err
+            //     }
+            //     return data.location;
+            // });
+            s3.upload(params, async function (err, data) {
+                if (err) {
+                    throw err;
+                }
+                console.log(data)
+                console.log(`File updated successfully. ${data.Location}`);
 
-                    return res.status(200).json(result);
+                await Avatar.findOneAndUpdate({ refUser: user._id },
+                    {
+                        filename: req.file.filename, /* path: req.file.path */
+                        path: data.Location, contentType: req.file.mimetype
+                    },
+                    { new: true })
+                    .exec((err, result) => {
+                        if (err || !result) {
+                            return res.status(400).json({ err: err })
+                        }
+                        user.avatar_profile._id = result._id;
+                        user.avatar_profile.path = result.path;
+                        user.avatar_profile.contentType = result.contentType;
+                        user.avatar_profile.filename = result.filename;
+                        user.save();
 
-                })
+                        return res.status(200).json(result);
+
+                    })
+            });
+
+
         }
 
     } catch (e) {
@@ -501,6 +543,7 @@ exports.uploadPhotos = async (req, res) => {
     let form = new formidable.IncomingForm({ uploadDir: "./uploads/user/photos" })
     form.keepExtensions = true;
     // form.uploadDir = path.join(__dirname, "./../uploads/events/photo")
+
     form.parse(req, async (err, fields, files) => {
 
 
@@ -519,19 +562,35 @@ exports.uploadPhotos = async (req, res) => {
                 return res.status(400).json({ error: "Avatar nedds to be a gif, png, jpeg,jpg, or PNG" })
             }
 
-            let userPhoto = new UserPhoto({
-                refUser: req.profile._id,
-                contentType: files.img.type,
-                path: files.img.path,
-                filename: files.img.name
-            });
-            userPhoto.save((err, result) => {
-                let user = req.profile;
-                user.photos.push(result._id)
-                user.save();
 
-                return res.status(200).json(result);
-            });
+            const fileContent = fs.readFileSync(files.img.path);
+            var params = {
+                acl: 'public-read',
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: files.img.name,
+                Body: fileContent
+
+            }
+            var s3 = new AWS.S3({ credentials: creds });
+            s3.upload(params, (err, data) => {
+                if (err) {
+                    throw err
+                }
+                let userPhoto = new UserPhoto({
+                    refUser: req.profile._id,
+                    contentType: files.img.type,
+                    path: data.Location,
+                    filename: files.img.name
+                });
+                userPhoto.save((err, result) => {
+                    let user = req.profile;
+                    user.photos.push(result._id)
+                    user.save();
+
+                    return res.status(200).json(result);
+                });
+            })
+
 
         }
 
@@ -593,6 +652,36 @@ exports.deleteUser = async (req, res) => {
 
         return res.status(200).json("User deleted successfully");
     })
+
+}
+
+exports.deleteUserPhoto = async (req, res) => {
+    var params = {
+        acl: 'public-read',
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: req.filetoDelete,
+        // Body: fileContent
+
+    }
+    var s3 = new AWS.S3({ credentials: creds });
+    s3.deleteObject(params, (err, data)=> {
+        if(err){
+            return res.status(400).json({err:err})
+        }
+        console.log(data+ "deleted successfully");
+    })
+    await User.findOneAndUpdate() //parei aqui
+    await UserPhoto.findOneAndDelete({filename:req.filetoDelete}).exec((err,result)=> {
+        if(err){
+            return res.status(400).json({err:err})
+        }
+        if(!result) {
+            return res.status(404).json({err: "Can't delete because this photo doesn't exists"});
+        }
+
+        return res.status(200).json({message:"Deleted successfully"})
+    })
+
 }
 
 
