@@ -6,6 +6,10 @@ const uuid = require("uuidv1")
 const path = require("path")
 const formidable = require("formidable")
 const _ = require("lodash");
+const fs = require("fs")
+const AWS = require("aws-sdk")
+var creds = new AWS.Credentials({ accessKeyId: process.env.AWS_ACCESS_KEY, secretAccessKey: process.env.AWS_SECRET_KEY, sessionToken: null })
+AWS.config.update({ credentials: creds, region: process.env.AWS_REGION })
 
 
 exports.getEventById = (req, res, next, id) => {
@@ -189,20 +193,6 @@ exports.isEventOwner = (req, res, next) => {
 
 
 exports.updateEvent = async (req, res) => {
-    // Event.findByIdAndUpdate(req.body.eventId,
-    //     {
-    //         $set: req.body
-    //     }
-    // ).exec((err, updatedEvent) => {
-    //     if (err) {
-    //         return res.status(400).json(err)
-    //     } else {
-
-    //         return res.status(200).json(updatedEvent);
-    //     }
-
-    // })
-
     let form = new formidable.IncomingForm({ uploadDir: "./uploads/events/photo" })
     form.keepExtensions = true;
     // form.uploadDir = path.join(__dirname, "./../uploads/events/photo")
@@ -224,51 +214,83 @@ exports.updateEvent = async (req, res) => {
                 return res.status(400).json({ err: "Avatar needs to be a gif, png, jpeg,jpg, or PNG" })
             }
 
+        }
+        var fileContent = fs.readFileSync(files.img.path);
+        var params = {
+            acl: 'public-read',
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: "event" + Date.now() + path.extname(files.img.name),
+            Body: fileContent
 
-            let eventCoverExists = await EventPhoto.exists({ refEvent: req.event._id })
+        }
+        var s3 = new AWS.S3({ credentials: creds });
+        let eventCoverExists = await EventPhoto.exists({ refEvent: req.event._id })
 
-            if (!eventCoverExists) {
+        if (!eventCoverExists) {
+            s3.upload(params, async (err, data) => {
+                if (err) {
+                    return res.status(400).json({ err: err })
+                }
 
                 let eventphoto = new EventPhoto({
                     refEvent: req.event._id,
                     contentType: files.img.type,
-                    path: files.img.path,
-                    filename: files.img.name
+                    path: data.Location,
+                    filename: data.key,
                 });
-                eventphoto.save();
+                await eventphoto.save();
                 req.event.event_cover = eventphoto._id
-            } else {
+                req.event.save();
+            })
 
-                let eventPhoto = await EventPhoto.findOneAndUpdate({ refEvent: req.event._id },
-                    { filename: files.img.name, path: files.img.path, contentType: files.img.type },
-                    { $new: true })
+        } else {
+            s3.upload(params, async (err, data) => {
+                if (err) {
+                    return res.status(400).json({ err: err })
+                }
+
+                await EventPhoto.findOneAndUpdate({ refEvent: req.event._id },
+                    {
+                        filename: data.key,
+                        path: data.Location,
+                        contentType: files.img.type
+                    },
+                    { new: true })
                     .exec((err, result) => {
                         if (err) {
                             return res.status(400).json({ err: err })
                         }
                         req.event.event_cover = result._id;
+                        req.event.save()
                         // return res.status(200).json(result);
                     });
-
-
-            }
-
+            })
         }
 
+        // let event = req.event;
+        // event = _.extend(event, fields)
 
-        let event = req.event;
-        event = _.extend(event, fields)
+        // event.save((err, result) => {
+        //     if (err) {
 
-        event.save((err, result) => {
-            if (err) {
-
-                return res.status(400).json({ err: "erro ao tentar atualizar o evento" })
-            }
+        //         return res.status(400).json({ err: "erro ao tentar atualizar o evento" })
+        //     }
 
 
-            return res.status(200).json(event)
-        })
+        //     return res.status(200).json(event)
+        // })
+
+        await Event.findByIdAndUpdate(req.event._id,
+            { $set: fields },
+            { new: true })
+            .exec((err, result) => {
+                if (err) {
+                    return res.status(400).json({ err: err })
+                }
+                return res.status(200).json(result);
+            })
     })
+
 
 
 }
@@ -570,13 +592,14 @@ exports.goToEvent = async (req, res) => {
     if (userInEventExists) {
         return res.status(400).json({ error: "user going to this event" })
     } else {
-        req.event.users.push(req.body.yourId);
-        req.event.save();
+
         await User.findByIdAndUpdate(req.body.yourId, { $push: { eventsGoing: req.event._id } }) //$push adicionando evento que ele vai ao usuario
             .exec((err, result) => {
                 if (err || !result) {
                     return res.status(400).json({ error: err })
                 }
+                req.event.users.push(req.body.yourId);
+                req.event.save();
             });
 
     }

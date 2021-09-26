@@ -458,7 +458,7 @@ exports.deleteUser = (req, res, next) => {
 }
 
 exports.getUserByDifferentGender = (req, res) => {
-    console.log(req.query.yourId)
+    // console.log(req.query.yourId)
     // User.find({ gender: { $ne: req.query.gender }, $and: { likesReceived: { $ne: req.query.yourId } } })
     User.find({ $and: [{ gender: { $ne: req.query.gender } }, { likesReceived: { $ne: req.query.yourId } }] })
         .populate("likesSent", "_id firstname lastname username birthday")
@@ -523,7 +523,8 @@ exports.getLikesReceived = async (req, res) => {
 
     await User.find({ likesSent: req.profile._id })
         .populate("avatar_profile", "_id path contentType filename")
-        .select("-likesSent -likesReceived -gender -matches -eventsGoing -eventsCreated -email -createdAt -__v -photos")
+        .populate("photos", "_id path contentType filename")
+        .select("-likesSent -likesReceived -gender -matches -eventsGoing -eventsCreated -email -createdAt -__v ")
         .exec((err, usersLiked) => {
             if (err) {
                 return res.status(400).json({ error: err })
@@ -584,7 +585,7 @@ exports.uploadPhotos = async (req, res) => {
                 });
                 userPhoto.save((err, result) => {
                     let user = req.profile;
-                    user.photos.push(result._id)
+                    user.photos.push({ _id: result._id })
                     user.save();
 
                     return res.status(200).json(result);
@@ -605,6 +606,20 @@ exports.deleteAvatar = async (req, res) => {
     // req.profile.save();
     // console.log("caindo aqui" + avatar_profile._id);
     if (avatar_profile) {
+        var params = {
+            // acl: 'public-read',
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: avatar_profile.filename,
+            // Body: fileContent
+
+        }
+        var s3 = new AWS.S3({ credentials: creds });
+        await s3.deleteObject(params, (err, data) => {
+            if (err) {
+                return res.status(400).json({ err: err })
+            }
+            console.log(data + "deleted successfully");
+        }).promise()
         await User.findOneAndUpdate({ _id: req.profile._id },
             { $unset: { avatar_profile: avatar_profile._id } },
             { new: true })
@@ -656,31 +671,65 @@ exports.deleteUser = async (req, res) => {
 }
 
 exports.deleteUserPhoto = async (req, res) => {
+    // console.log(req.profile);
+    // console.log("photoId:" + req.body.photoId);
+    // console.log(req.profile.photos.map((element) => element.id).includes(req.body.photoId))
+
+
     var params = {
-        acl: 'public-read',
+        // acl: 'public-read',
         Bucket: process.env.AWS_BUCKET_NAME,
-        Key: req.filetoDelete,
+        Key: req.body.photoName,
         // Body: fileContent
 
     }
     var s3 = new AWS.S3({ credentials: creds });
-    s3.deleteObject(params, (err, data)=> {
-        if(err){
-            return res.status(400).json({err:err})
+    await s3.deleteObject(params, (err, data) => {
+        if (err) {
+            return res.status(400).json({ err: err })
         }
-        console.log(data+ "deleted successfully");
-    })
-    await User.findOneAndUpdate() //parei aqui
-    await UserPhoto.findOneAndDelete({filename:req.filetoDelete}).exec((err,result)=> {
-        if(err){
-            return res.status(400).json({err:err})
-        }
-        if(!result) {
-            return res.status(404).json({err: "Can't delete because this photo doesn't exists"});
-        }
+        console.log(data + "deleted successfully");
+    }).promise()
+    req.profile.photos.pull({ _id: req.body.photoId });
+    req.profile.save();
+    // req.profile.photos.pull({_id:req.photo});
 
-        return res.status(200).json({message:"Deleted successfully"})
-    })
+    await UserPhoto.findOneAndDelete({ _id: req.body.photoId })
+        .exec((err, result) => {
+            if (err) {
+                return res.status(400).json({ err: err })
+            }
+
+            return res.status(200).json({ "message": "deleted successfully" });
+        });
+
+
+    // var params = {
+    //     acl: 'public-read',
+    //     Bucket: process.env.AWS_BUCKET_NAME,
+    //     Key: req.filetoDelete,
+    //     // Body: fileContent
+
+    // }
+    // var s3 = new AWS.S3({ credentials: creds });
+    // s3.deleteObject(params, (err, data)=> {
+    //     if(err){
+    //         return res.status(400).json({err:err})
+    //     }
+    //     console.log(data+ "deleted successfully");
+    // })
+    // await User.findOneAndUpdate() //parei aqui
+    // await UserPhoto.findOneAndDelete({filename:req.filetoDelete}).exec((err,result)=> {
+    //     if(err){
+    //         return res.status(400).json({err:err})
+    //     }
+    //     if(!result) {
+    //         return res.status(404).json({err: "Can't delete because this photo doesn't exists"});
+    //     }
+
+    //     return res.status(200).json({message:"Deleted successfully"})
+    // })
+
 
 }
 
