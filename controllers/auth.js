@@ -82,7 +82,7 @@ exports.logout = (req, res) => {
 
 exports.verifyUserExists = async (req, res, next) => {
 
-    let userExists = await User.exists({ $or: [{ email: req.body.data }, { username: req.body.data }] });
+    let userExists = await User.exists({ $or: [{ email: req.body.data }, { username: req.body.data }, { _id: req.body.userId }] });
 
     if (!userExists) {
         return res.status(404).json({ error: "Not found user with this data" })
