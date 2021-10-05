@@ -519,6 +519,26 @@ exports.getGoingEvents = async (req, res) => {
     await Event.find({ users: { $in: [req.query.userId] } })
         // .populate("users", "_id username firstname lastname avatar_profile")
         // .populate("avatar_profile", "_id path contentType filename")
+        // .populate({
+        //     path: "event_owner", populate: {
+        //         path: "avatar_profile",
+        //         model: "Avatar",
+        //         select: "-refUser -__v"
+        //     },
+        //     select:
+        //         "-email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -photos -usertype -role -birthday -createdAt -about -livesIn -job -company -school -__v"
+
+        // })
+        // .populate({
+        //     path: "users", populate: [{
+        //         path: "avatar_profile",
+        //         model: "Avatar",
+        //         select: "-refUser -__v"
+        //     }, { path: "photos", model: "UserPhoto", select: "-refUser -__v" }],
+        //     select:
+        //         "-email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -usertype -role -createdAt  -__v"
+
+        // })
         .populate({
             path: "event_owner", populate: {
                 path: "avatar_profile",
@@ -529,6 +549,9 @@ exports.getGoingEvents = async (req, res) => {
                 "-email -likesSent -likesReceived -eventsGoing -eventsCreated -matches -gender -photos -usertype -role -birthday -createdAt -about -livesIn -job -company -school -__v"
 
         })
+        .populate("event_cover", "_id path filename contentType")
+        .populate("event_owner.avatar_profile", "_id path filename ")
+        // .populate("users", "_id username firstname lastname")
         .populate({
             path: "users", populate: [{
                 path: "avatar_profile",
