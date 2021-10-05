@@ -4,7 +4,7 @@ const { createEvent, getEventById, getEvents,
     getSingleEvent, updateEvent, isEventOwner,
     getEventsByEventStatus, searchEventsByName,
     getGoingEvents, eventPhotoUpload, uploadEventCover,
-    getYourEvents, goToEvent } = require("../controllers/event")
+    getYourEvents, goToEvent, deleteEvent } = require("../controllers/event")
 const { requireLogin } = require("../controllers/auth")
 
 router.get("/api/events/all", requireLogin, getEvents)
@@ -19,6 +19,7 @@ router.get("/api/events/find?:eventname", requireLogin, searchEventsByName)
 router.get("/api/events/goingEvents?:userId", requireLogin, getGoingEvents)
 router.post("/api/events/:eventId/go", requireLogin, goToEvent)
 router.put("/api/events/:eventId/removeUser")
+route.delete("/api/events/:eventId/delete", requireLogin, isEventOwner, deleteEvent)
 
 router.param("eventId", getEventById)
 // router.param("eventStatus", getEventStatus)

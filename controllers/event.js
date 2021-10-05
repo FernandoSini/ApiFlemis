@@ -608,3 +608,41 @@ exports.removeUserFromEvent = async (req, res) => {
     console.log(req.body.yourId);
     console.log(req.event);
 }
+
+exports.deleteEvent = async (req, res) => {
+    console.log(req.event._id);
+    await EventPhoto.findByIdAndDelete({ refEvent: req.event._id }).exec((err, result) => {
+        if (err) {
+            return res.status(400).json({ err: err });
+        }
+        var params = {
+            // acl: 'public-read',
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: result.filename,
+            // Body: fileContent
+
+        }
+        var s3 = new AWS.S3({ credentials: creds });
+        await s3.deleteObject(params, (err, data) => {
+            if (err) {
+                return res.status(400).json({ err: err })
+            }
+            console.log(data + "deleted successfully from s3");
+        }).promise()
+
+    })
+    
+    await Event.findByIdAndDelete({ _id: req.event._id }).exec((err, result) => {
+        if (err) {
+            return res.status(400).json({ err: err })
+        }
+
+        return res.status(200).json({ message: "Event deleted successfully! " });
+    })
+
+
+
+
+
+
+}
