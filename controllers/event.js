@@ -623,7 +623,7 @@ exports.deleteEvent = async (req, res) => {
 
         }
         var s3 = new AWS.S3({ credentials: creds });
-        await s3.deleteObject(params, (err, data) => {
+        s3.deleteObject(params, (err, data) => {
             if (err) {
                 return res.status(400).json({ err: err })
             }
@@ -631,7 +631,7 @@ exports.deleteEvent = async (req, res) => {
         }).promise()
 
     })
-    
+
     await Event.findByIdAndDelete({ _id: req.event._id }).exec((err, result) => {
         if (err) {
             return res.status(400).json({ err: err })
@@ -639,10 +639,5 @@ exports.deleteEvent = async (req, res) => {
 
         return res.status(200).json({ message: "Event deleted successfully! " });
     })
-
-
-
-
-
 
 }

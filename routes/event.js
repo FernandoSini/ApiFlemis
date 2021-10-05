@@ -19,7 +19,7 @@ router.get("/api/events/find?:eventname", requireLogin, searchEventsByName)
 router.get("/api/events/goingEvents?:userId", requireLogin, getGoingEvents)
 router.post("/api/events/:eventId/go", requireLogin, goToEvent)
 router.put("/api/events/:eventId/removeUser")
-route.delete("/api/events/:eventId/delete", requireLogin, isEventOwner, deleteEvent)
+router.delete("/api/events/:eventId/delete", requireLogin, isEventOwner, deleteEvent)
 
 router.param("eventId", getEventById)
 // router.param("eventStatus", getEventStatus)
