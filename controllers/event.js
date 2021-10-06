@@ -429,10 +429,10 @@ exports.getEventsByEventStatus = async (req, res) => {
                     event.event_status = "INCOMING";
                     event.save();
                 } else if (now >=startDate && now <endDate) {
-                    event.event_status = "ENDED"
+                    event.event_status = "HAPPENING"
                     event.save()
                 } else {
-                    event.event_status = "HAPPENING"
+                    event.event_status = "ENDED"
                     event.save();
                 }
             })
