@@ -53,11 +53,11 @@ exports.getEventById = (req, res, next, id) => {
             if (now < startDate) {
                 req.event.event_status = "INCOMING";
                 req.event.save();
-            } else if (now >= startDate && now < endDate) {
-                req.event.event_status = "HAPPENING"
+            } else if (now >= endDate) {
+                req.event.event_status = "ENDED"
                 req.event.save()
             } else {
-                req.event.event_status = "ENDED"
+                req.event.event_status = "HAPPENING"
                 req.event.save();
             }
             next()
@@ -162,14 +162,14 @@ exports.getEvents = async (req, res) => {
                     //     event.save();
                     // }
 
-                    if (now < startDate) {
+                    if (startDate > now) {
                         event.event_status = "INCOMING";
                         event.save();
-                    } else if (now >= startDate && now < endDate) {
-                        event.event_status = "HAPPENING"
+                    } else if (endDate <= now) {
+                        event.event_status = "ENDED"
                         event.save()
                     } else {
-                        event.event_status = "ENDED"
+                        event.event_status = "HAPPENING"
                         event.save();
                     }
                 })
@@ -425,14 +425,14 @@ exports.getEventsByEventStatus = async (req, res) => {
                 //         event.save();
                 //     }
                 // })
-                if (now < startDate) {
+                if (now<startDate) {
                     event.event_status = "INCOMING";
                     event.save();
-                } else if (now >=startDate && now <endDate) {
-                    event.event_status = "HAPPENING"
+                } else if (now>=endDate) {
+                    event.event_status = "ENDED"
                     event.save()
                 } else {
-                    event.event_status = "ENDED"
+                    event.event_status = "HAPPENING"
                     event.save();
                 }
             })
@@ -499,10 +499,10 @@ exports.searchEventsByName = async (req, res) => {
                 //     event.save();
                 // }
 
-                if (startDate > now) {
+                if (now <startDate) {
                     event.event_status = "INCOMING";
                     event.save();
-                } else if (endDate <= now) {
+                } else if (now >= endDate) {
                     event.event_status = "ENDED"
                     event.save()
                 } else {
