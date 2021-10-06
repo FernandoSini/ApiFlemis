@@ -49,16 +49,26 @@ exports.getEventById = (req, res, next, id) => {
             // } else {
             //     req.event.event_status = "HAPPENING"
             //     req.event.save();
+            // // }
+            // if (now < startDate) {
+            //     req.event.event_status = "INCOMING";
+            //     req.event.save();
+            // } else if (now >= startDate && endDate <= now) {
+            //     req.event.event_status = "HAPPENING"
+            //     req.event.save()
+            // } else {
+            //     req.event.event_status = "ENDED"
+            //     req.event.save();
             // }
             if (now < startDate) {
-                req.event.event_status = "INCOMING";
-                req.event.save();
-            } else if (now >= startDate && endDate <= now) {
-                req.event.event_status = "HAPPENING"
-                req.event.save()
+                event.event_status = "INCOMING";
+                event.save();
+            } else if (now >= startDate && now <= endDate) {
+                event.event_status = "HAPPENING"
+                event.save()
             } else {
-                req.event.event_status = "ENDED"
-                req.event.save();
+                event.event_status = "ENDED"
+                event.save();
             }
             next()
         })
