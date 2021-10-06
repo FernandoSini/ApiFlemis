@@ -499,14 +499,14 @@ exports.searchEventsByName = async (req, res) => {
                 //     event.save();
                 // }
 
-                if (startDate > now) {
+                if (now < startDate) {
                     event.event_status = "INCOMING";
                     event.save();
-                } else if (endDate <= now) {
-                    event.event_status = "ENDED"
+                } else if (now >= startDate && now <= endDate) {
+                    event.event_status = "HAPPENING"
                     event.save()
                 } else {
-                    event.event_status = "HAPPENING"
+                    event.event_status = "ENDED"
                     event.save();
                 }
             })
